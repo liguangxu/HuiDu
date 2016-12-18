@@ -1,0 +1,22 @@
+{
+  "tableData": "[
+    {
+      index: '1',
+      name: '郑锋',
+      username: 'zhengfeng',
+      job: '采购经理',
+      tel: '123456789',
+      mail: '123@163.com',
+      address: '上海市闵行区东川路'
+    },
+    {
+      index: '3',
+      name: '张磊1',
+      username: 'zhanglei',
+      job: '采购经理',
+      tel: '123456789',
+      mail: '123@163.com',
+      address: '上海市浦东新区张江高科松涛路'
+    }
+  ]"
+}

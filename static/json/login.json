@@ -1,0 +1,18 @@
+{
+    "code": "1",
+    "data": {
+        "_id": "57f7a7709b55e69ed905035d",
+        "username": "zhengfeng",
+        "name": "郑峰",
+        "level": 0,
+        "companyid": "101",
+        "sceneList": [{
+          "sceneid": "11",
+          "scenename": "辉度"
+        },
+        {
+          "sceneid": "22",
+          "scenename": "智慧工厂"
+        }]
+    }
+}

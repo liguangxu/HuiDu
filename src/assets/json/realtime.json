@@ -1,0 +1,99 @@
+{
+  "code": "1", 
+  "data": [{
+      "channelid": "1",
+      "spotlocation": "301",
+      "spotid": "1",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": true,
+      "show": true
+    },
+    {
+      "channelid": "2",
+      "spotlocation": "302",
+      "spotid": "2",
+      "userdesc": "温度",
+      "value": "24",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "离线",
+      "control": false,
+      "show": true
+    },
+    {
+      "channelid": "3",
+      "spotlocation": "303",
+      "spotid": "3",
+      "userdesc": "电压",
+      "value": "23",
+      "unit": "V",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": true,
+      "show": true
+    },
+    {
+      "channelid": "4",
+      "spotlocation": "304",
+      "spotid": "4",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": false,
+      "show": false
+    },
+    {
+      "channelid": "5",
+      "spotlocation": "305",
+      "spotid": "5",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": false,
+      "show": false
+    },
+    {
+      "channelid": "6",
+      "spotlocation": "306",
+      "spotid": "6",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": false,
+      "show": false
+    },
+    {
+      "channelid": "7",
+      "spotlocation": "307",
+      "spotid": "7",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": false,
+      "show": false
+    },
+    {
+      "channelid": "8",
+      "spotlocation": "308",
+      "spotid": "8",
+      "userdesc": "温度",
+      "value": "23",
+      "unit": "°C",
+      "timestamp": "2016-12-06 17:06:10",
+      "isOn": "在线",
+      "control": false,
+      "show": false
+    }]
+}
