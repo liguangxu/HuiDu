@@ -28,13 +28,13 @@
 </template>
 
 <script>
+import Util from '../utils/util.js'
+
 export default {
   data () {
     return {
-      sceneid: this.getSceneid(),
       tableData: [],
-      apiUrl: 'api/realtime/get',
-      sendData_realtime: {
+      realtimeGetBody: {
         userid: '',
         pagenum: '1',
         sceneid: '',
@@ -77,89 +77,41 @@ export default {
     }
   },
   methods: {
-    showError (info) {
-      this.$notify.error({
-        title: '请求失败',
-        message: info,
-        offset: 100
-      })
-    },
-    getSceneid () {
-      let sceneid = this.$route.params.sceneid
-      if (sceneid === null || sceneid === undefined) {
-        let storage = window.localStorage
-        let nowUser = storage.getItem('nowUser')
-        if (!(nowUser === null)) {
-          let sceneList = JSON.parse(nowUser).sceneList
-          if (sceneList != null && sceneList.length > 0) {
-            sceneid = JSON.parse(nowUser).sceneList[0]._id
-          } else {
-            sceneid = null
-          }
-          // console.log(sceneid)
-        }
-      }
-      console.log('sceneid : ' + sceneid)
-      return sceneid
-    },
-    getApiUrl () {
-      return '../../static/json/realtime' + this.getSceneid() + '.json'
-    },
-    setSceneid () {
-      let sceneid = this.$route.params.sceneid
-      if (sceneid === null || sceneid === undefined) {
-        let storage = window.localStorage
-        let nowUser = storage.getItem('nowUser')
-        if (!(nowUser === null)) {
-          sceneid = JSON.parse(nowUser).sceneList[0].sceneid
-        }
-      }
-      this.$set(this.sendData_realtime, 'sceneid', sceneid)
-      // this.$set(this, 'apiUrl', '../../static/json/realtime' + sceneid + '.json')
-    },
-    setSendData_realtime () {
-      let storage = window.localStorage
-      let nowUser = storage.getItem('nowUser')
+    setRealtimeGetBody () {
       let userid = null
-      if (!(nowUser === null)) {
-        userid = JSON.parse(nowUser)._id
+      let nowUser = Util.localStorageGet('nowUser')
+      if (nowUser != null) {
+        userid = nowUser._id
       }
-      this.$set(this.sendData_realtime, 'userid', userid)
-      this.$set(this.sendData_realtime, 'sceneid', this.getSceneid())
+      let sceneid = Util.getNowSceneid()
+      this.$set(this.realtimeGetBody, 'userid', userid)
+      this.$set(this.realtimeGetBody, 'sceneid', sceneid)
     },
     getData () {
-      this.setSendData_realtime()
-      this.$http.post(this.apiUrl, this.sendData_realtime)
+      this.setRealtimeGetBody()
+      this.$http.post(Util.realtimeApi.get, this.realtimeGetBody)
           .then((response) => {
             console.log('response code : ')
             console.log(response)
             if (response.data.code === '0') {
-              this.showError(response.data.data)
+              Util.showError('获取实时监控数据失败', response.data.data)
             } else {
               this.$set(this, 'tableData', response.data.data)
             }
           })
           .catch(function (response) {
-            this.showError('网络断开，请稍后再试')
+            Util.showError('获取实时监控数据失败', '网络断开，请稍后再试')
           })
-      // this.$http.get(this.apiUrl)
-      //     .then((response) => {
-      //       console.log('realtime sceneid : ')
-      //       console.log(this.sceneid)
-      //       console.log('realtime data : ')
-      //       console.log(response)
-      //       if (response.data.code === '0') {
-      //         console.log('realtime data read: error')
-      //       } else {
-      //         this.$set(this, 'tableData', response.data.data)
-      //       }
-      //     })
+    },
+    handleRouteChange () {
+      let sceneid = this.$route.params.sceneid
+      Util.setNowSceneid(sceneid, null)
+      this.getData()
     }
   },
   watch: {
     $route () {
-      // this.setSceneid()
-      this.getData()
+      this.handleRouteChange()
     }
   },
   mounted: function () {

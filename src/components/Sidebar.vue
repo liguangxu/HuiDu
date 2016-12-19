@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import Util from '../utils/util.js'
+
 export default {
   data () {
     return {
@@ -45,6 +47,18 @@ export default {
       }
       if (currentPath === '/main/systemCenter') {
         currentPath = '/main/systemCenter/systemMainConfig'
+      }
+      if (currentPath === '/main' || currentPath === '/main/realtime') {
+        let sceneid = Util.getNowSceneid()
+        if (sceneid != null) {
+          currentPath = '/main/realtime/' + sceneid
+        }
+      }
+      if (currentPath === '/main/history') {
+        let sceneid = Util.getNowSceneid()
+        if (sceneid != null) {
+          currentPath = '/main/history/' + sceneid
+        }
       }
       return currentPath
     },

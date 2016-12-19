@@ -31,49 +31,33 @@
 </template>
 
 <script>
+  import Util from '../utils/util.js'
+
   export default {
     data () {
       return {
-        username: '',
-        password: '',
-        apiUrl: '/api/user/login',
         loginForm: {
           username: '',
           password: ''
-        },
-        loginErrorInfo: '用户名或密码错误，请重新登录',
-        networkErrorInfo: '网络错误，请稍后重试'
+        }
       }
     },
     methods: {
-      // onSubmit: function () {
-      //   this.$http.get(this.apiUrl)
-      //     .then((response) => {
-      //       this.$set(this, 'password', response.data.name)
-      //     })
-      // },
-      showError (info) {
-        this.$notify.error({
-          title: '登录失败',
-          message: info,
-          offset: 100
-        })
-      },
       onSubmit: function () {
-        this.$http.post(this.apiUrl, this.loginForm)
+        this.$http.post(Util.userApi.login, this.loginForm)
           .then((response) => {
-            console.log(response.data.code)
+            // console.log(response.data.code)
             if (response.data.code === '0') {
-              this.showError(this.loginErrorInfo)
+              Util.showError('登录失败', '用户名或密码错误，请重新登录')
             } else {
-              var storage = window.localStorage
-              storage.setItem('nowUser', JSON.stringify(response.data.data))
-              console.log(JSON.parse(storage['nowUser']))
+              Util.localStorageSet('nowUser', response.data.data)
+              Util.setNowSceneid(null, response.data.data.sceneList)
+              // console.log(JSON.parse(window.localStorage['nowUser']))
               this.$router.push({path: '/main'})
             }
           })
           .catch(function (response) {
-            this.showError(this.networkErrorInfo)
+            Util.showError('登录失败', '网络错误，请稍后重试')
           })
       },
       goto () {
@@ -88,6 +72,7 @@
         }
       },
       onSubmitTest () {
+        Util.showError('哈哈哈', '2333')
         this.$http.get('../../static/json/login.json')
           .then((response) => {
             // console.log(response)

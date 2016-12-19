@@ -34,6 +34,7 @@ const routes = [
       { path: 'realtime', component: Realtime, meta: { requiresAuth: true } },
       { path: 'realtime/:sceneid', component: Realtime, meta: { requiresAuth: true } },
       { path: 'history', component: History, meta: { requiresAuth: true } },
+      { path: 'history/:sceneid', component: History, meta: { requiresAuth: true } },
       { path: 'userCenter', component: UserCenter, meta: { requiresAuth: true } },
       { path: 'systemCenter',
         component: SystemCenter,

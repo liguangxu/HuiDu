@@ -60,6 +60,7 @@
 <script>
 import MyHistoryCharts from './HistoryCharts.vue'
 import echarts from 'echarts'
+import Util from '../utils/util.js'
 
 export default {
   components: {
@@ -70,16 +71,14 @@ export default {
       timegap: '',
       dataChartVisible: false,
       currentPage1: 1,
-      apiUrl: 'api/history/enter',
-      searchUrl: 'api/history/search',
-      sendData_history: {
+      historyEnterBody: {
         userid: '',
         pagenum: '1',
         sceneid: '',
         factor: ''
       },
-      sendData_historySearch: {
-        id: '',
+      historySearchBody: {
+        channel_id: '',
         begintime: '',
         endtime: ''
       },
@@ -87,156 +86,52 @@ export default {
     }
   },
   methods: {
-    showError (info) {
-      this.$notify.error({
-        title: '请求失败',
-        message: info,
-        offset: 100
-      })
-    },
     viewHistoryData (row) {
       this.dataChartVisible = true
-      this.$set(this.sendData_historySearch, 'id', row.channelid)
-      // let myChart = echarts.init(document.getElementById('historydata-chart'))
-      // var option = {
-      //   title: {
-      //     text: '未来一周气温变化',
-      //     subtext: '纯属虚构'
-      //   },
-      //   tooltip: {
-      //     trigger: 'axis'
-      //   },
-      //   legend: {
-      //     data: ['最高气温', '最低气温']
-      //   },
-      //   toolbox: {
-      //     show: true,
-      //     feature: {
-      //       mark: {show: true},
-      //       dataView: {show: true, readOnly: false},
-      //       magicType: {show: true, type: ['line', 'bar']},
-      //       restore: {show: true},
-      //       saveAsImage: {show: true}
-      //     }
-      //   },
-      //   calculable: true,
-      //   xAxis: [
-      //     {
-      //       type: 'category',
-      //       boundaryGap: false,
-      //       data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-      //     }
-      //   ],
-      //   yAxis: [
-      //     {
-      //       type: 'value',
-      //       axisLabel: {
-      //         formatter: '{value} °C'
-      //       }
-      //     }
-      //   ],
-      //   series: [
-      //     {
-      //       name: '最高气温',
-      //       type: 'line',
-      //       data: [11, 11, 15, 13, 12, 13, 10],
-      //       markPoint: {
-      //         data: [
-      //           { type: 'max', name: '最大值' },
-      //           { type: 'min', name: '最小值' }
-      //         ]
-      //       },
-      //       markLine: {
-      //         data: [
-      //           { type: 'average', name: '平均值' }
-      //         ]
-      //       }
-      //     }
-      //   ]
-      // }
-      // myChart.setOption(option)
+      this.$set(this.historySearchBody, 'id', row.channel_id)
     },
-    getSceneid () {
-      let sceneid = this.$route.params.sceneid
-      if (sceneid === null || sceneid === undefined) {
-        let storage = window.localStorage
-        let nowUser = storage.getItem('nowUser')
-        if (!(nowUser === null)) {
-          let sceneList = JSON.parse(nowUser).sceneList
-          if (sceneList != null && sceneList.length > 0) {
-            sceneid = JSON.parse(nowUser).sceneList[0]._id
-          } else {
-            sceneid = null
-          }
-        }
-      }
-      console.log('history sceneid : ' + sceneid)
-      return sceneid
-    },
-    setSendData_history () {
+    setHistoryEnterBody () {
       console.log('111111')
-      let storage = window.localStorage
-      let nowUser = storage.getItem('nowUser')
       let userid = null
-      if (!(nowUser === null)) {
-        userid = JSON.parse(nowUser)._id
+      let nowUser = Util.localStorageGet('nowUser')
+      if (nowUser != null) {
+        userid = nowUser._id
       }
-      this.$set(this.sendData_history, 'userid', userid)
-      this.$set(this.sendData_history, 'sceneid', this.getSceneid())
+      let sceneid = Util.getNowSceneid()
+      this.$set(this.historyEnterBody, 'userid', userid)
+      this.$set(this.historyEnterBody, 'sceneid', sceneid)
     },
     getData () {
-      console.log('2333333')
-      this.setSendData_history()
-      console.log('23333333333')
-      this.$http.post(this.apiUrl, this.sendData_history)
+      this.setHistoryEnterBody()
+      this.$http.post(Util.historyApi.enter, this.historyEnterBody)
           .then((response) => {
-            console.log('response code : ')
-            console.log(response)
             if (response.data.code === '0') {
-              this.showError(response.data.data)
+              Util.showError('获取历史数据失败', response.data.data)
             } else {
               this.$set(this, 'historyData', response.data.data)
             }
           })
           .catch(function (response) {
-            this.showError('网络断开，请稍后再试')
+            Util.showError('获取历史数据失败', '网络断开，请稍后再试')
           })
     },
     searchHistoryData () {
-      console.log('time gap : ')
       let begints = Math.round(this.timegap[0])
       let endts = Math.round(this.timegap[1])
-      // let result = null
       let yData = []
       let xData = []
-      console.log(begints)
-      console.log(endts)
-      this.$set(this.sendData_historySearch, 'begintime', begints)
-      this.$set(this.sendData_historySearch, 'endtime', endts)
-      console.log(this.sendData_historySearch)
-      this.$http.post(this.searchUrl, this.sendData_historySearch)
+      this.$set(this.historySearchBody, 'begintime', begints)
+      this.$set(this.historySearchBody, 'endtime', endts)
+      this.$http.post(Util.historyApi.search, this.historySearchBody)
           .then((response) => {
-            console.log('response code : ')
-            // console.log(response)
             if (response.data.code === '0') {
-              this.showError(response.data.data)
+              Util.showError('获取阶段历史数据失败', response.data.data)
             } else {
-              // result = response.data.data
-              // console.log('here 233333333333')
-              console.log(response.data.data)
               for (var i = 0; i < response.data.data.length; i++) {
                 let item = response.data.data[i]
-                console.log(item)
                 yData.push(item.value)
                 xData.push(item.date)
               }
-              // for (let i in response.data.data) {
-              //   console.log(i.value)
-              //   yData.push(i.value)
-              // }
-              console.log('here 233333333333')
-              console.log(yData)
-              console.log('here 22222222222')
               let myChart = echarts.init(document.getElementById('historydata-chart'))
               var option = {
                 title: {
@@ -284,8 +179,18 @@ export default {
             }
           })
           .catch(function (response) {
-            this.showError('网络断开，请稍后再试')
+            Util.showError('获取阶段历史数据失败', '网络断开，请稍后再试')
           })
+    },
+    handleRouteChange () {
+      let sceneid = this.$route.params.sceneid
+      Util.setNowSceneid(sceneid, null)
+      this.getData()
+    }
+  },
+  watch: {
+    $route () {
+      this.handleRouteChange()
     }
   },
   mounted: function () {

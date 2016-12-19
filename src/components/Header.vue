@@ -59,6 +59,9 @@ export default {
     },
     logout () {
       window.localStorage.clear()
+      this.$http.get('http://localhost:8888/user/logout')
+          .then((response) => {
+          })
       this.$router.push({path: '/'})
     }
   }

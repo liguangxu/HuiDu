@@ -206,12 +206,13 @@
 </template>
 
 <script>
+import Util from '../utils/util.js'
+
 export default {
   data () {
     return {
-      apiUrl: 'api/user/',
-      sendDate_get: { _id: '' },
-      sendDate_delete: { _id: '' },
+      userGetBody: { _id: '' },
+      userDeleteBody: { _id: '' },
       userEditFormVisible: false,
       userAddFormVisible: false,
       userEditForm: {
@@ -248,13 +249,6 @@ export default {
     }
   },
   methods: {
-    showError (info) {
-      this.$notify.error({
-        title: '请求失败',
-        message: info,
-        offset: 100
-      })
-    },
     userEdit (index, row) {
       this.userEditFormVisible = true
       console.log(row.address)
@@ -280,25 +274,23 @@ export default {
       })
     },
     getUsers () {
-      console.log(this.apiUrl + 'get')
-      console.log(this.sendDate_get)
-      this.$http.post(this.apiUrl + 'get', this.sendDate_get)
+      let nowUser = Util.localStorageGet('nowUser')
+      let userid = nowUser === null ? null : nowUser._id
+      this.$set(this.userGetBody, '_id', userid)
+      console.log(this.userGetBody)
+      console.log(Util.userApi.get)
+      this.$http.post(Util.userApi.get, this.userGetBody)
         .then((response) => {
+          console.log(response.data)
           if (response.data.code === '0') {
-            this.showError('获取数据失败，请稍后再试')
+            Util.showError('获取用户数据失败', response.data.data)
           } else {
             this.$set(this, 'userTableData', response.data.data)
           }
         })
         .catch(function (response) {
-          this.showError('网络错误，请稍后再试')
+          Util.showError('获取用户数据失败', '网络错误，请稍后再试')
         })
-      // console.log('here')
-      // this.$http.get('../../static/json/user.json')
-      //     .then((response) => {
-      //       console.log(response)
-      //       this.$set(this, 'userTableData', response.data.tableData)
-      //     })
     },
     addUser () {
       this.$http.post(this.apiUrl + 'add', this.userAddForm)
