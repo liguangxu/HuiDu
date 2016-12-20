@@ -1,82 +1,328 @@
 <template>
 	<div class="content-name">
-		<br><br>
 		<el-row>
-			<el-col :span="2">&nbsp;</el-col>
-			<el-col :span="6">公司名称</el-col>
-		</el-row>
-		<br><br>
-		<el-row>
-			<el-col :span="2">&nbsp;</el-col>
-			<el-col :span="5"><el-input placeholder="请输入公司名称" v-model="companyName" :disabled="true"></el-input></el-col>
-			<el-col :span="1">&nbsp;</el-col>
-			<el-col :span="2">
-				<el-button type="info" @click="updateCompanyName">修改</el-button>
-			</el-col>
-		</el-row>
-		<br><br><br>
-		<el-row>
-			<el-col :span="2">&nbsp;</el-col>
-			<el-col :span="6">登陆页Logo</el-col>
-			<el-col :span="1">&nbsp;</el-col>
-			<el-col :span="6">登陆页背景图</el-col>
-			<el-col :span="1">&nbsp;</el-col>
-			<el-col :span="6">左上角Logo</el-col>
-			<el-col :span="3">&nbsp;</el-col>
+		  <el-col :span="2">&nbsp;</el-col>
+		  <el-col :span="3">公司信息</el-col>
+		  <el-col :span="2"><el-button size="large" type="primary" v-if="level === 0" @click="openAddCompanyForm">新 增</el-button>
+		  </el-col>
 		</el-row>
 		<br>
 		<el-row>
-			<el-col :span="2">&nbsp;</el-col>
-			<el-col :span="6">
-				<el-upload action="//jsonplaceholder.typicode.com/posts/" type="drag" :thumbnail-mode="true" 
-					:on-preview="handlePreview" :on-remove="handleRemove" :default-file-list="logoList">
-					<i class="el-icon-upload"></i>
-					<div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
-					<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-				</el-upload>
-			</el-col>
-			<el-col :span="1">&nbsp;</el-col>
-			<el-col :span="6">
-				<el-upload action="//jsonplaceholder.typicode.com/posts/" type="drag" :thumbnail-mode="true" 
-					:on-preview="handlePreview" :on-remove="handleRemove" :default-file-list="bgList">
-					<i class="el-icon-upload"></i>
-					<div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
-					<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-				</el-upload>
-			</el-col>
-			<el-col :span="1">&nbsp;</el-col>
-			<el-col :span="6">
-				<el-upload action="//jsonplaceholder.typicode.com/posts/" type="drag" :thumbnail-mode="true" 
-					:on-preview="handlePreview" :on-remove="handleRemove" :default-file-list="logoList">
-					<i class="el-icon-upload"></i>
-					<div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
-					<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-				</el-upload>
-			</el-col>
-			<el-col :span="2">&nbsp;</el-col>
+		  <el-col :span="2">&nbsp;</el-col>
+		  <el-col :span="20">
+			<el-table :data="tableData" stripe border>
+    				<el-table-column type="index" label="序号" width="100" align="center"></el-table-column>
+    				<el-table-column prop="companyname" label="公司名称" width="140" align="center"></el-table-column>
+    				<el-table-column prop="phone" label="电话" width="140" align="center"></el-table-column>
+    				<el-table-column prop="address" label="地址" width="200" align="center"></el-table-column>
+    				<el-table-column prop="provice" label="省" width="140" align="center"></el-table-column>
+    				<el-table-column prop="city" label="市" width="140" align="center"></el-table-column>
+    				<el-table-column prop="district" label="区" width="140" align="center"></el-table-column>
+                    <el-table-column prop="baidulongitude" label="经度" width="100" align="center"></el-table-column>
+                    <el-table-column prop="baidulatitude" label="纬度" align="center"></el-table-column>
+    				<el-table-column :context="_self" inline-template label="操作" width="160" align="center">
+          				<div>
+            				<el-button size="small" type="primary" @click="openUpdateCompanyForm(row)">修改
+            				</el-button>
+          				</div>
+        			</el-table-column>
+  				</el-table>
+		  </el-col>
 		</el-row>
-		<br><br><br>
-		<el-row>
-			<el-col :span="16">&nbsp;</el-col>
-			<el-col :span="3">
-				<el-button type="primary" size="large" class="submit-button">提交</el-button>
-			</el-col>
-			<!-- <el-col :span="10">&nbsp;</el-col> -->
-		</el-row>
+
+		<el-dialog title="新增公司" v-model="addCompanyFormVisible">
+      		<el-form :model="addCompanyForm" label-position="top">
+        	<el-row>
+          		<el-col :span="2">&nbsp;</el-col>
+          		<el-col :span="9">
+            	<el-form-item label="省">
+              	<el-input v-model="addCompanyForm.provice"></el-input>
+            	</el-form-item>
+            	<el-form-item label="市">
+              	<el-input v-model="addCompanyForm.city"></el-input>
+            	</el-form-item>
+            	<el-form-item label="区">
+              	<el-input v-model="addCompanyForm.district"></el-input>
+            	</el-form-item>
+            	<el-form-item label="公司名称">
+              	<el-input v-model="addCompanyForm.companyname"></el-input>
+            	</el-form-item>
+          		</el-col>
+          		<el-col :span="2">&nbsp;</el-col>
+          		<el-col :span="9">
+            	<el-form-item label="经度">
+              	<el-input v-model="addCompanyForm.baidulongitude"></el-input>
+            	</el-form-item>
+            	<el-form-item label="纬度">
+              	<el-input v-model="addCompanyForm.baidulatitude"></el-input>
+            	</el-form-item>
+            	<el-form-item label="电话">
+              	<el-input v-model="addCompanyForm.phone"></el-input>
+            	</el-form-item>
+            	<el-form-item label="地址">
+              	<el-input v-model="addCompanyForm.address"></el-input>
+            	</el-form-item>
+          		</el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="登陆页LOGO">
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess" :default-file-list="fileList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="登陆页背景图">
+              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess" 
+              :default-file-list="fileList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="左上角LOGO">
+              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleLogoUploadSuccess" :default-file-list="fileList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+      		</el-form>
+      	<div slot="footer" class="dialog-footer">
+        <el-button @click="addCompanyFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleAddCompany">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="修改公司" v-model="updateCompanyFormVisible">
+      		<el-form :model="updateCompanyForm" label-position="top">
+        	<el-row>
+          		<el-col :span="2">&nbsp;</el-col>
+          		<el-col :span="9">
+            	<el-form-item label="省">
+              	<el-input v-model="updateCompanyForm.provice"></el-input>
+            	</el-form-item>
+            	<el-form-item label="市">
+              	<el-input v-model="updateCompanyForm.city"></el-input>
+            	</el-form-item>
+            	<el-form-item label="区">
+              	<el-input v-model="updateCompanyForm.district"></el-input>
+            	</el-form-item>
+            	<el-form-item label="公司名称">
+              	<el-input v-model="updateCompanyForm.companyname"></el-input>
+            	</el-form-item>
+          		</el-col>
+          		<el-col :span="2">&nbsp;</el-col>
+          		<el-col :span="9">
+            	<el-form-item label="经度">
+              	<el-input v-model="updateCompanyForm.baidulongitude"></el-input>
+            	</el-form-item>
+            	<el-form-item label="纬度">
+              	<el-input v-model="updateCompanyForm.baidulatitude"></el-input>
+            	</el-form-item>
+            	<el-form-item label="电话">
+              	<el-input v-model="updateCompanyForm.phone"></el-input>
+            	</el-form-item>
+            	<el-form-item label="地址">
+              	<el-input v-model="updateCompanyForm.address"></el-input>
+            	</el-form-item>
+          		</el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="登陆页LOGO">
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess" 
+              :default-file-list="loginlogoList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="登陆页背景图">
+              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess" 
+              :default-file-list="bgimgList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+        	<el-row>
+        	<el-col :span="2">&nbsp;</el-col>
+        	<el-col :span="20">
+        	 <el-form-item label="左上角LOGO">
+              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              :on-error="handleUploadError" :on-success="handleLogoUploadSuccess" :default-file-list="logoList"
+              :thumbnail-mode="true">
+                <i class="el-icon-upload"></i>
+                <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
+                <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+              </el-upload>
+            </el-form-item>
+            </el-col>
+        	</el-row>
+      		</el-form>
+      	<div slot="footer" class="dialog-footer">
+        <el-button @click="updateCompanyFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="handleUpdateCompany">确 定</el-button>
+      </div>
+    </el-dialog>
 	</div>
 </template>
 
 <script>
+import Util from '../utils/util.js'
+
 export default {
   data () {
     return {
+      level: Util.getNowLevel(),
       companyName: '蓝丰科技有限公司',
       // updateCompanyLogo: false,
-      logoList: [{name: 'logo图', url: '../../static/image/index/login_logo.png'}],
-      bgList: [{name: '背景图', url: '../../static/image/index/loginbg.png'}]
+      logoList: [],
+      bgimgList: [],
+      loginlogoList: [],
+      companyInfoGetBody: '',
+      addCompanyForm: {
+        provice: '',
+        city: '',
+        district: '',
+        baidulongitude: '',
+        baidulatitude: '',
+        companyname: '',
+        phone: '',
+        address: '',
+        loginlogo: '',
+        backgroundimg: '',
+        logo: ''
+      },
+      updateCompanyForm: {
+        _id: '',
+        provice: '',
+        city: '',
+        district: '',
+        baidulongitude: '',
+        baidulatitude: '',
+        companyname: '',
+        phone: '',
+        address: '',
+        loginlogo: '',
+        backgroundimg: '',
+        logo: ''
+      },
+      addCompanyFormVisible: false,
+      updateCompanyFormVisible: false,
+      fileList: [],
+      imgUploadUrl: Util.systemApi.companyImgUpload,
+      tableData: []
     }
   },
   methods: {
+    getCompanyInfo () {
+      let level = Util.getNowLevel()
+      if (level !== 0) {
+        let nowUser = Util.localStorageGet('nowUser')
+        let companyid = nowUser === null ? null : nowUser.companyid
+        // this.$set(this.companyInfoGetBody, 'companyid', companyid)
+        this.$set(this, 'companyInfoGetBody', companyid)
+      } else {
+        // this.$set(this.companyInfoGetBody, 'companyid', '')
+        this.$set(this, 'companyInfoGetBody', '')
+      }
+      this.$http.post(Util.systemApi.companyGet, this.companyInfoGetBody)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('获取公司数据失败', response.data.data)
+            } else {
+              this.$set(this, 'tableData', response.data.data)
+              console.log(response.data.data)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取公司数据失败', '网络错误，请稍后重试')
+          })
+    },
+    openAddCompanyForm () {
+      this.addCompanyFormVisible = true
+    },
+    handleAddCompany () {
+      this.$http.post(Util.systemApi.companyAdd, this.addCompanyForm)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('新增公司失败', response.data.data)
+            } else {
+              this.$set(this, 'tableData', response.data.data)
+              // console.log(response.data.data)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('新增公司失败', '网络错误，请稍后重试')
+          })
+      this.addCompanyFormVisible = false
+    },
+    openUpdateCompanyForm (row) {
+      this.updateCompanyFormVisible = true
+      this.$set(this.updateCompanyForm, '_id', row._id)
+      this.$set(this.updateCompanyForm, 'provice', row.provice)
+      this.$set(this.updateCompanyForm, 'city', row.city)
+      this.$set(this.updateCompanyForm, 'district', row.district)
+      this.$set(this.updateCompanyForm, 'companyname', row.companyname)
+      this.$set(this.updateCompanyForm, 'phone', row.phone)
+      this.$set(this.updateCompanyForm, 'address', row.address)
+      this.$set(this.updateCompanyForm, 'baidulongitude', row.baidulongitude)
+      this.$set(this.updateCompanyForm, 'baidulatitude', row.baidulatitude)
+      let temp = [{ name: '登陆页LOGO', url: row.loginlogo }]
+      this.$set(this, 'loginlogoList', temp)
+      temp = [{ name: '登陆页背景图', url: row.backgroundimg }]
+      this.$set(this, 'bgimgList', temp)
+      temp = [{ name: '左上角LOGO', url: row.logo }]
+      this.$set(this, 'logoList', temp)
+    },
+    handleUpdateCompany () {
+      this.$http.post(Util.systemApi.companyUpdate, this.updateCompanyForm)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('修改公司信息失败', response.data.data)
+            } else {
+              this.getCompanyInfo()
+            }
+          })
+          .catch(function (response) {
+            Util.showError('修改公司信息失败', '网络错误，请稍后重试')
+          })
+      this.updateCompanyFormVisible = false
+    },
     updateCompanyName () {
       this.$prompt('请输入新的公司名称', '修改公司名称', {
         confirmButtonText: '确定',
@@ -103,7 +349,29 @@ export default {
     },
     handlePreview (file) {
       console.log(file)
+    },
+    handleUploadBefore (file) {
+      console.log(file)
+    },
+    handleUploadError (err, response, file) {
+      console.log(err)
+      console.log(response.data.data)
+    },
+    handleLoginLogoUploadSuccess (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.addCompanyForm, 'loginlogo', response.data)
+    },
+    handleBackgroundimgUploadSuccess (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.addCompanyForm, 'backgroundimg', response.data)
+    },
+    handleLogoUploadSuccess (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.addCompanyForm, 'logo', response.data)
     }
+  },
+  mounted: function () {
+    this.getCompanyInfo()
   }
 }
 </script>

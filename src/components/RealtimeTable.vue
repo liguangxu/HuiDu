@@ -97,6 +97,7 @@ export default {
               Util.showError('获取实时监控数据失败', response.data.data)
             } else {
               this.$set(this, 'tableData', response.data.data)
+              Util.setFactors(response.data.factorList)
             }
           })
           .catch(function (response) {

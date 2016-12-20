@@ -5,7 +5,13 @@ export default new Vue({
     return {
       userApi: {
         login: this.getBaseApi() + 'user/login',
-        get: this.getBaseApi() + 'user/get'
+        get: this.getBaseApi() + 'user/get',
+        add: this.getBaseApi() + 'user/add',
+        delete: this.getBaseApi() + 'user/delete',
+        update: this.getBaseApi() + 'user/update',
+        sceneGet: this.getBaseApi() + 'user/getCompanyScenes',
+        companyGet: this.getBaseApi() + 'user/getAllCompany',
+        spotGet: this.getBaseApi() + 'user/getSceneSpots'
       },
       realtimeApi: {
         get: this.getBaseApi() + 'realtime/get'
@@ -16,7 +22,23 @@ export default new Vue({
       },
       deviceApi: {
         sceneGet: this.getBaseApi() + 'user/getCompanyScenes',
-        sceneAdd: this.getBaseApi() + 'device/scene/add'
+        sceneAdd: this.getBaseApi() + 'device/scene/add',
+        sceneUpdate: this.getBaseApi() + 'device/scene/update',
+        sceneDelete: this.getBaseApi() + 'device/scene/delete',
+        sceneImgUpload: this.getBaseApi() + 'device/scene/uploadFile',
+        companyGet: this.getBaseApi() + 'user/getAllCompany',
+        spotGet: this.getBaseApi() + 'device/spot/get',
+        spotAdd: this.getBaseApi() + 'device/spot/add',
+        spotDelete: this.getBaseApi() + 'device/spot/delete',
+        channelGet: this.getBaseApi() + 'device/channel/get',
+        channelSpotGet: this.getBaseApi() + 'device/channel/getSpot',
+        channelAdd: this.getBaseApi() + 'device/channel/add'
+      },
+      systemApi: {
+        companyGet: this.getBaseApi() + 'system/getCompany',
+        companyImgUpload: this.getBaseApi() + 'system/uploadCompanyFile',
+        companyAdd: this.getBaseApi() + 'system/addCompany',
+        companyUpdate: this.getBaseApi() + 'system/updateCompany'
       }
     }
   },
@@ -56,6 +78,45 @@ export default new Vue({
     },
     getNowSceneid () {
       return this.localStorageGet('nowSceneid')
+    },
+    getNowLevel () {
+      return this.localStorageGet('nowUser').level
+    },
+    getNowCompanyid () {
+      return this.localStorageGet('nowUser').companyid
+    },
+    getNowCompanyname () {
+      return this.localStorageGet('nowUser').companyname
+    },
+    setDeviceSelectedScene (id, name) {
+      if (id !== null) {
+        this.localStorageSet('deviceSelectedSceneid', id)
+      }
+      if (name !== null) {
+        this.localStorageSet('deviceSelectedScenename', name)
+      }
+    },
+    getDeviceSelectedScenename () {
+      return this.localStorageGet('deviceSelectedScenename')
+    },
+    getDeviceSelectedSceneid () {
+      return this.localStorageGet('deviceSelectedSceneid')
+    },
+    setCompanyScenes (sceneList) {
+      if (sceneList !== null) {
+        this.localStorageSet('companySceneList', sceneList)
+      }
+    },
+    getCompanyScenes () {
+      return this.localStorageGet('companySceneList')
+    },
+    setFactors (factorList) {
+      if (factorList !== null) {
+        this.localStorageSet('factorList', factorList)
+      }
+    },
+    getFactors () {
+      return this.localStorageGet('factorList')
     }
   }
 })
