@@ -12,15 +12,16 @@
     <el-row>
       <el-col :span="2">&nbsp;</el-col>
       <el-col :span="20">
-         <el-table :data="sceneTableData" stripe border>
+         <el-table :data="sceneTableData" border highlight-current-row 
+         @current-change="viewSpots">
             <el-table-column type="index" label="序号" width="180" align="center"></el-table-column>
             <el-table-column prop="name" label="场景名称" width="240" align="center"></el-table-column>
             <el-table-column prop="image" label="场景图" align="center"></el-table-column>
             <el-table-column :context="_self" inline-template label="操作" width="300" align="center">
                   <div>
-                    <el-button size="small" type="info" @click="viewSpots(row._id, row.name)">查看监测点</el-button>
+                    <!-- <el-button size="small" type="info" @click="viewSpots(row._id, row.name)">查看监测点</el-button> -->
                     <el-button size="small" type="primary" @click="openUpdateScene(row)">修改</el-button>
-                    <el-button size="small" type="danger" @click="openDeleteScene(row)">删除</el-button>
+                    <!-- <el-button size="small" type="danger" @click="openDeleteScene(row)">删除</el-button> -->
                   </div>
               </el-table-column>
           </el-table>
@@ -77,8 +78,8 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="场景图：" :label-width="formLabelWidth">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" 
-              :on-error="handleUploadError" :on-success="handleUploadSuccess" :default-file-list="fileList"
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-remove="handleRemove"
+              :on-error="handleUploadError" :on-success="handleUpdateUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
                 <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -98,9 +99,11 @@
       <el-col :span="2">&nbsp;</el-col>
       <el-col :span="3">监测点列表</el-col>
       <el-col :span="2">
-        <el-button size="large" type="primary" @click="openAddSpot">新 增
+        <el-button size="large" type="primary" :disabled="selectedScenename === ''"
+        @click="openAddSpot">新 增
         </el-button>
       </el-col>
+      <el-col :span="10">当前场景：{{ selectedScenename }}</el-col>
     </el-row>
     <br>
     <el-row>
@@ -109,7 +112,9 @@
          <el-table :data="spotTableData" stripe border>
         <el-table-column prop="spotid" label="监测点位" width="180" align="center"></el-table-column>
         <el-table-column prop="spotlocation" label="监测点名称" width="360" align="center"></el-table-column>
-        <el-table-column prop="sceneid" label="所属场景" width="240" align="center"></el-table-column>
+        <el-table-column label="所属场景" inline-template align="center">
+          <span>{{ selectedScenename }}</span>
+        </el-table-column>
         <el-table-column :context="_self" inline-template label="操作" align="center">
           <div>
             <el-button size="small" type="danger" @click="openDeleteSpot(row)">删除</el-button>
@@ -172,6 +177,7 @@ import Util from '../utils/util.js'
 export default {
   data () {
     return {
+      selectedScenename: '',
       fileList: [],
       sceneImg: { name: '', url: '' },
       nowCompanyname: this.getNowCompanyname(),
@@ -218,11 +224,29 @@ export default {
       },
       sceneTableData: [],
       spotTableData: [],
-      deviceSceneGetBody: { companyid: '' },
+      deviceSceneGetBody: { companyid: '', level: null },
       companyOptions: []
     }
   },
   methods: {
+    refreshUserInfo () {
+      let nowUser = Util.localStorageGet('nowUser')
+      let userid = nowUser === null ? null : nowUser._id
+      let body = { _id: userid }
+      this.$http.post(Util.userApi.currentDataGet, body)
+        .then((response) => {
+          if (response.data.code === '0') {
+            Util.showError('更新用户数据失败', '请稍后重试')
+          } else {
+            Util.localStorageSet('nowUser', response.data.data)
+            Util.setNowSceneid(null, response.data.data.sceneList)
+              // console.log(JSON.parse(window.localStorage['nowUser']))
+          }
+        })
+        .catch(function (response) {
+          Util.showError('更新用户数据失败', '网络错误，请稍后重试')
+        })
+    },
     getNowCompanyname () {
       return Util.getNowCompanyname()
     },
@@ -252,13 +276,11 @@ export default {
     },
     getScenes () {
       let level = Util.getNowLevel()
-      if (level !== 0) {
-        let nowUser = Util.localStorageGet('nowUser')
-        let companyid = nowUser === null ? null : nowUser.companyid
-        this.$set(this.deviceSceneGetBody, 'companyid', companyid)
-      } else {
-        this.$set(this.deviceSceneGetBody, 'companyid', '')
-      }
+      let nowUser = Util.localStorageGet('nowUser')
+      let companyid = nowUser === null ? null : nowUser.companyid
+      this.$set(this.deviceSceneGetBody, 'companyid', companyid)
+      this.$set(this.deviceSceneGetBody, 'level', level)
+      console.log('deviceSceneGetBody-----------------')
       console.log(this.deviceSceneGetBody)
       this.$http.post(Util.deviceApi.sceneGet, this.deviceSceneGetBody)
           .then((response) => {
@@ -266,6 +288,8 @@ export default {
               Util.showError('获取场景数据失败', response.data.data)
             } else {
               this.$set(this, 'sceneTableData', response.data.data)
+              console.log('deviceSceneGet-----------------')
+              console.log(response.data.data)
             }
           })
           .catch(function (response) {
@@ -284,6 +308,7 @@ export default {
       this.getCompanys()
       this.$set(this.updateSceneForm, '_id', row._id)
       this.$set(this.updateSceneForm, 'name', row.name)
+      this.$set(this.updateSceneForm, 'companyid', row.companyid)
       let level = Util.getNowLevel()
       if (level !== 0) {
         this.$set(this.updateSceneForm, 'companyid', '')
@@ -311,18 +336,22 @@ export default {
             Util.showError('添加场景失败', '网络错误，请稍后重试')
           })
       this.addSceneFormVisible = false
+      this.refreshUserInfo()
     },
     handleUpdateScene () {
       let level = Util.getNowLevel()
       if (level !== 0) {
         this.$set(this.updateSceneForm, 'companyid', Util.getNowCompanyid())
       }
+      console.log('updateSceneForm----------------------')
       console.log(this.updateSceneForm)
       this.$http.post(Util.deviceApi.sceneUpdate, this.updateSceneForm)
           .then((response) => {
             if (response.data.code === '0') {
               Util.showError('修改场景失败', response.data.data)
             } else {
+              console.log('--------------00000000000000')
+              console.log(response.data)
               this.getScenes()
             }
           })
@@ -331,6 +360,7 @@ export default {
           })
       this.$refs.updateSceneForm.resetFields()
       this.updateSceneFormVisible = false
+      this.refreshUserInfo()
     },
     openDeleteScene (row) {
       this.$confirm('此操作将永久删除该场景, 是否继续?', '提示', {
@@ -366,6 +396,9 @@ export default {
             Util.showError('删除场景失败', '网络错误，请稍后重试')
           })
     },
+    handleRemove (file, fileList) {
+      this.fileList = []
+    },
     handleUploadBefore (file) {
       console.log(file)
     },
@@ -376,14 +409,35 @@ export default {
     handleUploadSuccess (response, file, fileList) {
       this.$set(this.addSceneForm, 'image', response.data)
     },
-    viewSpots (_id, name) {
-      Util.setDeviceSelectedScene(_id, name)
-      this.$set(this.deviceSpotGetBody, '_id', _id)
+    handleUpdateUploadSuccess (response, file, fileList) {
+      this.$set(this.updateSceneForm, 'image', response.data)
+    },
+    viewSpots (value) {
+      if (value !== null) {
+        Util.setDeviceSelectedScene(value._id, value.name)
+        this.$set(this.deviceSpotGetBody, '_id', value._id)
+        this.$http.post(Util.deviceApi.spotGet, this.deviceSpotGetBody)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('获取监测点数据失败', response.data.data)
+            } else {
+              this.$set(this, 'selectedScenename', value.name)
+              this.$set(this, 'spotTableData', response.data.data)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取监测点数据失败', '网络错误，请稍后重试')
+          })
+      }
+    },
+    viewSpotsAgain (sceneid) {
+      this.$set(this.deviceSpotGetBody, '_id', sceneid)
       this.$http.post(Util.deviceApi.spotGet, this.deviceSpotGetBody)
           .then((response) => {
             if (response.data.code === '0') {
               Util.showError('获取监测点数据失败', response.data.data)
             } else {
+              // this.$set(this, 'selectedScenename', value.name)
               this.$set(this, 'spotTableData', response.data.data)
             }
           })
@@ -426,7 +480,7 @@ export default {
             if (response.data.code === '0') {
               Util.showError('删除监测点失败', response.data.data)
             } else {
-              this.viewSpots(sceneid, null)
+              this.viewSpotsAgain(sceneid)
             }
           })
           .catch(function (response) {
@@ -440,13 +494,14 @@ export default {
             if (response.data.code === '0') {
               Util.showError('添加监测点失败', response.data.data)
             } else {
-              this.viewSpots(response.data.data.sceneid, null)
+              this.viewSpotsAgain(response.data.data.sceneid)
             }
           })
           .catch(function (response) {
             Util.showError('添加监测点数据失败', '网络错误，请稍后重试')
           })
       this.addSpotFormVisible = false
+      // this.refreshUserInfo()
     }
   },
   mounted: function () {

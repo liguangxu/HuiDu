@@ -7,7 +7,7 @@
         </div>
      </template>
       <template v-if="$route.path.indexOf('/main/history') === 0">
-        <div v-for="scene in sceneList">
+        <div v-for="scene in historySceneList">
           <el-menu-item v-bind:index="'/main/history/'+scene._id" class="sidebar-font">{{ scene.name }}</el-menu-item>
         </div>
      </template>
@@ -36,7 +36,9 @@ export default {
   data () {
     return {
       path: this.getCurrentPath(),
-      sceneList: this.getSceneList()
+      sceneList: this.getSceneList(),
+      historySceneList: [],
+      historySceneListGetBody: { userid: '' }
     }
   },
   methods: {
@@ -51,7 +53,13 @@ export default {
       if (currentPath === '/main' || currentPath === '/main/realtime') {
         let sceneid = Util.getNowSceneid()
         if (sceneid != null) {
-          currentPath = '/main/realtime/' + sceneid
+          if (Util.isInRealtimeScenes(sceneid)) {
+            currentPath = '/main/realtime/' + sceneid
+          } else {
+            let temp = Util.getRealtimeFirstSceneid()
+            currentPath = '/main/realtime/' + temp
+            Util.setNowSceneid(temp, null)
+          }
         }
       }
       if (currentPath === '/main/history') {
@@ -72,7 +80,31 @@ export default {
       }
       // console.log(sceneList)
       return sceneList
+    },
+    getHistorySceneList () {
+      let storage = window.localStorage
+      let nowUser = storage.getItem('nowUser')
+      let userid = null
+      if (!(nowUser === null)) {
+        userid = JSON.parse(nowUser)._id
+      }
+      this.$set(this.historySceneListGetBody, 'userid', userid)
+      this.$http.post(Util.historyApi.sceneListGet, this.historySceneListGetBody)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('获取历史场景失败', response.data.data)
+            } else {
+              console.log(response.data)
+              this.$set(this, 'historySceneList', response.data.data)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取历史场景失败', '网络断开，请稍后再试')
+          })
     }
+  },
+  mounted: function () {
+    this.getHistorySceneList()
   }
 }
 </script>

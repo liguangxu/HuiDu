@@ -7,7 +7,13 @@
 			</el-col>
 			<el-col :span="16" class="factor-box">
 			<div class="factor-wrap" id="imgs">
-				<div class="factor">
+        <div v-for="item in factors">
+          <div class="factor">
+          <img src="../../static/image/info/02.png">
+          <span class="factor-desc">{{ item }}</span>
+          </div>
+        </div>
+				<!-- <div class="factor">
 					<img src="../../static/image/info/01.png">
 					<span class="factor-desc">监测因子1</span>
 				</div>
@@ -46,7 +52,7 @@
 				<div class="factor">
 					<img src="../../static/image/info/10.png">
 					<span class="factor-desc">监测因子10</span>
-				</div>
+				</div> -->
 				</div>
 			</el-col>
 			<el-col :span="2" class="ctrl">
@@ -58,10 +64,13 @@
 </template>
 
 <script>
+  import { bus } from '../utils/bus.js'
+
   export default {
     data () {
       return {
-        the_index: 0
+        the_index: 0,
+        factors: []
       }
     },
     methods: {
@@ -85,7 +94,13 @@
         this.the_index -= 1
         imgs.style.marginLeft = 120 * this.the_index + 'px'
         // imgs.style.marginLeft = -100 + 'px'
+      },
+      updateFactors (factors) {
+        this.$set(this, 'factors', factors)
       }
+    },
+    mounted: function () {
+      bus.$on('factorsUpdate', this.updateFactors)
     }
   }
 </script>
@@ -129,8 +144,8 @@
   display: inline-block;
 }
 .factor img{
-  height: 50px;
-  width: 50px;
+  height: 61px;
+  width: 61px;
   padding: 3px;
   border-radius: 5px;
   box-shadow: 0px 0px 1px #aaa;	

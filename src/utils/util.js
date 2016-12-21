@@ -11,17 +11,20 @@ export default new Vue({
         update: this.getBaseApi() + 'user/update',
         sceneGet: this.getBaseApi() + 'user/getCompanyScenes',
         companyGet: this.getBaseApi() + 'user/getAllCompany',
-        spotGet: this.getBaseApi() + 'user/getSceneSpots'
+        spotGet: this.getBaseApi() + 'user/getSceneSpots',
+        currentDataGet: this.getBaseApi() + 'user/getusercurrentdata'
       },
       realtimeApi: {
-        get: this.getBaseApi() + 'realtime/get'
+        get: this.getBaseApi() + 'realtime/get',
+        control: this.getBaseApi() + 'realtime/control'
       },
       historyApi: {
         enter: this.getBaseApi() + 'history/enter',
-        search: this.getBaseApi() + 'history/search'
+        search: this.getBaseApi() + 'history/search',
+        sceneListGet: this.getBaseApi() + 'history/getscene'
       },
       deviceApi: {
-        sceneGet: this.getBaseApi() + 'user/getCompanyScenes',
+        sceneGet: this.getBaseApi() + 'device/scene/getSceneByCompanyAndLevel',
         sceneAdd: this.getBaseApi() + 'device/scene/add',
         sceneUpdate: this.getBaseApi() + 'device/scene/update',
         sceneDelete: this.getBaseApi() + 'device/scene/delete',
@@ -38,16 +41,28 @@ export default new Vue({
         companyGet: this.getBaseApi() + 'system/getCompany',
         companyImgUpload: this.getBaseApi() + 'system/uploadCompanyFile',
         companyAdd: this.getBaseApi() + 'system/addCompany',
-        companyUpdate: this.getBaseApi() + 'system/updateCompany'
+        companyUpdate: this.getBaseApi() + 'system/updateCompany',
+        iconGet: this.getBaseApi() + 'system/getIcon',
+        iconAdd: this.getBaseApi() + 'system/iconAdd',
+        iconUpdate: this.getBaseApi() + 'system/iconUpdate',
+        iconDelete: this.getBaseApi() + 'system/iconDelete',
+        iconUpload: this.getBaseApi() + 'system/uploadIconFile'
       }
     }
   },
   methods: {
     getBaseApi () {
-      return 'http://localhost:8888/'
+      return 'api/'
     },
     showError (title, info) {
       this.$notify.error({
+        title: title,
+        message: info,
+        offset: 100
+      })
+    },
+    showInfo (title, info) {
+      this.$notify.info({
         title: title,
         message: info,
         offset: 100
@@ -69,15 +84,30 @@ export default new Vue({
     },
     setNowSceneid (nowSceneid, sceneList) {
       // 初次登陆，sceneList不为空
+      if (nowSceneid === null && sceneList === null) {
+        this.localStorageSet('nowSceneid', null)
+      }
       if (nowSceneid === null && sceneList != null && sceneList.length > 0) {
         this.localStorageSet('nowSceneid', sceneList[0]._id)
       }
-      if (nowSceneid != null && sceneList === null) {
+      if (nowSceneid !== null && sceneList === null) {
         this.localStorageSet('nowSceneid', nowSceneid)
       }
     },
     getNowSceneid () {
       return this.localStorageGet('nowSceneid')
+    },
+    getRealtimeFirstSceneid () {
+      return this.localStorageGet('nowUser').sceneList[0]._id
+    },
+    isInRealtimeScenes (sceneid) {
+      let list = this.localStorageGet('nowUser').sceneList
+      for (let i = 0; i < list.length; i++) {
+        if (list[i]._id === sceneid) {
+          return true
+        }
+      }
+      return false
     },
     getNowLevel () {
       return this.localStorageGet('nowUser').level

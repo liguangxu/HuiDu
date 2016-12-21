@@ -6,7 +6,8 @@
       <el-table :data="historyData" border>
         <el-table-column type="index" label="序号" width="140" align="center"></el-table-column>
         <el-table-column prop="spotid" label="监测点位" width="180" align="center"></el-table-column>
-        <el-table-column prop="spotlocation" label="监测点名称" align="center"></el-table-column>
+        <el-table-column prop="spotlocation" label="监测点名称" width="180" align="center"></el-table-column>
+        <el-table-column prop="userdesc" label="监测因子" align="center"></el-table-column>
         <el-table-column :context="_self" inline-template label="操作" align="center">
           <div id="historydatabtn">
             <el-button size="small" type="info" @click="viewHistoryData(row)">查看数据
@@ -30,7 +31,7 @@
 
       <el-dialog title="查看历史数据" v-model="dataChartVisible">
       <el-row>
-        <el-col :span="11">
+        <el-col :span="14">
           <div class="block">
           <el-date-picker v-model="timegap" type="datetimerange" placeholder="选择时间范围"style="width:350px">
           </el-date-picker>
@@ -88,7 +89,7 @@ export default {
   methods: {
     viewHistoryData (row) {
       this.dataChartVisible = true
-      this.$set(this.historySearchBody, 'id', row.channel_id)
+      this.$set(this.historySearchBody, 'channel_id', row.channel_id)
     },
     setHistoryEnterBody () {
       console.log('111111')
@@ -109,6 +110,8 @@ export default {
               Util.showError('获取历史数据失败', response.data.data)
             } else {
               this.$set(this, 'historyData', response.data.data)
+              console.log('history sidebar : ----------------------')
+              console.log(response.data)
             }
           })
           .catch(function (response) {
@@ -122,6 +125,8 @@ export default {
       let xData = []
       this.$set(this.historySearchBody, 'begintime', begints)
       this.$set(this.historySearchBody, 'endtime', endts)
+      console.log('historySearchBody------------------')
+      console.log(this.historySearchBody)
       this.$http.post(Util.historyApi.search, this.historySearchBody)
           .then((response) => {
             if (response.data.code === '0') {
@@ -203,7 +208,7 @@ export default {
 <style scoped>
 .history-content {
   margin-left: 200px;
-  margin-top: 100px;
+  margin-top: 20px;
   min-width: 1024px;
 }
 #historydata-chart {

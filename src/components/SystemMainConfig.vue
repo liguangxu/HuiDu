@@ -20,7 +20,7 @@
     				<el-table-column prop="district" label="区" width="140" align="center"></el-table-column>
                     <el-table-column prop="baidulongitude" label="经度" width="100" align="center"></el-table-column>
                     <el-table-column prop="baidulatitude" label="纬度" align="center"></el-table-column>
-    				<el-table-column :context="_self" inline-template label="操作" width="160" align="center">
+    				<el-table-column :context="_self" inline-template label="操作" width="160" align="center" fixed="right">
           				<div>
             				<el-button size="small" type="primary" @click="openUpdateCompanyForm(row)">修改
             				</el-button>
@@ -31,35 +31,36 @@
 		</el-row>
 
 		<el-dialog title="新增公司" v-model="addCompanyFormVisible">
-      		<el-form :model="addCompanyForm" label-position="top">
+      		<el-form ref="addCompanyForm" :model="addCompanyForm" :rules="rules" 
+          label-position="top">
         	<el-row>
           		<el-col :span="2">&nbsp;</el-col>
           		<el-col :span="9">
-            	<el-form-item label="省">
+            	<el-form-item label="省" prop="provice">
               	<el-input v-model="addCompanyForm.provice"></el-input>
             	</el-form-item>
-            	<el-form-item label="市">
+            	<el-form-item label="市" prop="city">
               	<el-input v-model="addCompanyForm.city"></el-input>
             	</el-form-item>
-            	<el-form-item label="区">
+            	<el-form-item label="区" prop="district">
               	<el-input v-model="addCompanyForm.district"></el-input>
             	</el-form-item>
-            	<el-form-item label="公司名称">
+            	<el-form-item label="公司名称" prop="companyname">
               	<el-input v-model="addCompanyForm.companyname"></el-input>
             	</el-form-item>
           		</el-col>
           		<el-col :span="2">&nbsp;</el-col>
           		<el-col :span="9">
-            	<el-form-item label="经度">
+            	<el-form-item label="经度" prop="baidulongitude">
               	<el-input v-model="addCompanyForm.baidulongitude"></el-input>
             	</el-form-item>
-            	<el-form-item label="纬度">
+            	<el-form-item label="纬度" prop="baidulatitude">
               	<el-input v-model="addCompanyForm.baidulatitude"></el-input>
             	</el-form-item>
-            	<el-form-item label="电话">
+            	<el-form-item label="电话" prop="phone">
               	<el-input v-model="addCompanyForm.phone"></el-input>
             	</el-form-item>
-            	<el-form-item label="地址">
+            	<el-form-item label="地址" prop="address">
               	<el-input v-model="addCompanyForm.address"></el-input>
             	</el-form-item>
           		</el-col>
@@ -67,7 +68,7 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="登陆页LOGO">
+        	 <el-form-item label="登陆页LOGO" prop="loginlogo">
               <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
               :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
@@ -81,8 +82,8 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="登陆页背景图">
-              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+        	 <el-form-item label="登陆页背景图" prop="backgroundimg">
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
               :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess" 
               :default-file-list="fileList"
               :thumbnail-mode="true">
@@ -96,8 +97,8 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="左上角LOGO">
-              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+        	 <el-form-item label="左上角LOGO" prop="logo">
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
               :on-error="handleUploadError" :on-success="handleLogoUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -109,41 +110,41 @@
         	</el-row>
       		</el-form>
       	<div slot="footer" class="dialog-footer">
-        <el-button @click="addCompanyFormVisible = false">取 消</el-button>
+        <el-button @click="closeAddCompanyForm">取 消</el-button>
         <el-button type="primary" @click="handleAddCompany">确 定</el-button>
       </div>
     </el-dialog>
 
     <el-dialog title="修改公司" v-model="updateCompanyFormVisible">
-      		<el-form :model="updateCompanyForm" label-position="top">
+      		<el-form ref="updateCompanyForm" :model="updateCompanyForm" :rules="rules2" label-position="top">
         	<el-row>
           		<el-col :span="2">&nbsp;</el-col>
           		<el-col :span="9">
-            	<el-form-item label="省">
+            	<el-form-item label="省" prop="provice">
               	<el-input v-model="updateCompanyForm.provice"></el-input>
             	</el-form-item>
-            	<el-form-item label="市">
+            	<el-form-item label="市" prop="city">
               	<el-input v-model="updateCompanyForm.city"></el-input>
             	</el-form-item>
-            	<el-form-item label="区">
+            	<el-form-item label="区" prop="district">
               	<el-input v-model="updateCompanyForm.district"></el-input>
             	</el-form-item>
-            	<el-form-item label="公司名称">
+            	<el-form-item label="公司名称" prop="companyname">
               	<el-input v-model="updateCompanyForm.companyname"></el-input>
             	</el-form-item>
           		</el-col>
           		<el-col :span="2">&nbsp;</el-col>
           		<el-col :span="9">
-            	<el-form-item label="经度">
+            	<el-form-item label="经度" prop="baidulongitude">
               	<el-input v-model="updateCompanyForm.baidulongitude"></el-input>
             	</el-form-item>
-            	<el-form-item label="纬度">
+            	<el-form-item label="纬度" prop="baidulatitude">
               	<el-input v-model="updateCompanyForm.baidulatitude"></el-input>
             	</el-form-item>
-            	<el-form-item label="电话">
+            	<el-form-item label="电话" prop="phone">
               	<el-input v-model="updateCompanyForm.phone"></el-input>
             	</el-form-item>
-            	<el-form-item label="地址">
+            	<el-form-item label="地址" prop="address">
               	<el-input v-model="updateCompanyForm.address"></el-input>
             	</el-form-item>
           		</el-col>
@@ -151,9 +152,10 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="登陆页LOGO">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
-              :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess" 
+        	 <el-form-item label="登陆页LOGO" prop="loginlogo">
+              <el-upload :action="imgUploadUrl" type="drag" 
+              :before-upload="handleUploadBefore" :on-remove="handleLoginLogoRemove"
+              :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess2" 
               :default-file-list="loginlogoList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -166,9 +168,10 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="登陆页背景图">
-              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
-              :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess" 
+        	 <el-form-item label="登陆页背景图" prop="backgroundimg">
+              <el-upload :action="imgUploadUrl" type="drag" 
+              :before-upload="handleUploadBefore" :on-remove="handleBgimgRemove"
+              :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess2" 
               :default-file-list="bgimgList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -181,9 +184,11 @@
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
-        	 <el-form-item label="左上角LOGO">
-              <el-upload action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
-              :on-error="handleUploadError" :on-success="handleLogoUploadSuccess" :default-file-list="logoList"
+        	 <el-form-item label="左上角LOGO" prop="logo">
+              <el-upload :action="imgUploadUrl" type="drag" 
+              :before-upload="handleUploadBefore" :on-remove="handleLogoRemove"
+              :on-error="handleUploadError" :on-success="handleLogoUploadSuccess2" 
+              :default-file-list="logoList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
                 <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -213,7 +218,7 @@ export default {
       logoList: [],
       bgimgList: [],
       loginlogoList: [],
-      companyInfoGetBody: '',
+      companyInfoGetBody: { companyid: '' },
       addCompanyForm: {
         provice: '',
         city: '',
@@ -245,7 +250,77 @@ export default {
       updateCompanyFormVisible: false,
       fileList: [],
       imgUploadUrl: Util.systemApi.companyImgUpload,
-      tableData: []
+      tableData: [],
+      rules: {
+        provice: [
+          { required: true, message: '省不能为空', trigger: 'change' }
+        ],
+        city: [
+          { required: true, message: '市不能为空', trigger: 'change' }
+        ],
+        district: [
+          { required: true, message: '区不能为空', trigger: 'change' }
+        ],
+        companyname: [
+          { required: true, message: '公司名称不能为空', trigger: 'change' }
+        ],
+        baidulongitude: [
+          { required: true, message: '经度不能为空', trigger: 'change' }
+        ],
+        baidulatitude: [
+          { required: true, message: '纬度不能为空', trigger: 'change' }
+        ],
+        phone: [
+          { required: true, message: '电话不能为空', trigger: 'change' }
+        ],
+        address: [
+          { required: true, message: '地址不能为空', trigger: 'change' }
+        ],
+        loginlogo: [
+          { required: true, message: '登陆页LOGO不能为空', trigger: 'change' }
+        ],
+        backgroundimg: [
+          { required: true, message: '登陆页背景图不能为空', trigger: 'change' }
+        ],
+        logo: [
+          { required: true, message: '左上角LOGO不能为空', trigger: 'change' }
+        ]
+      },
+      rules2: {
+        provice: [
+          { required: true, message: '省不能为空', trigger: 'change' }
+        ],
+        city: [
+          { required: true, message: '市不能为空', trigger: 'change' }
+        ],
+        district: [
+          { required: true, message: '区不能为空', trigger: 'change' }
+        ],
+        companyname: [
+          { required: true, message: '公司名称不能为空', trigger: 'change' }
+        ],
+        baidulongitude: [
+          { required: true, message: '经度不能为空', trigger: 'change' }
+        ],
+        baidulatitude: [
+          { required: true, message: '纬度不能为空', trigger: 'change' }
+        ],
+        phone: [
+          { required: true, message: '电话不能为空', trigger: 'change' }
+        ],
+        address: [
+          { required: true, message: '地址不能为空', trigger: 'change' }
+        ],
+        loginlogo: [
+          { required: true, message: '登陆页LOGO不能为空', trigger: 'change' }
+        ],
+        backgroundimg: [
+          { required: true, message: '登陆页背景图不能为空', trigger: 'change' }
+        ],
+        logo: [
+          { required: true, message: '左上角LOGO不能为空', trigger: 'change' }
+        ]
+      }
     }
   },
   methods: {
@@ -254,11 +329,11 @@ export default {
       if (level !== 0) {
         let nowUser = Util.localStorageGet('nowUser')
         let companyid = nowUser === null ? null : nowUser.companyid
-        // this.$set(this.companyInfoGetBody, 'companyid', companyid)
-        this.$set(this, 'companyInfoGetBody', companyid)
+        this.$set(this.companyInfoGetBody, 'companyid', companyid)
+        // this.$set(this, 'companyInfoGetBody', companyid)
       } else {
-        // this.$set(this.companyInfoGetBody, 'companyid', '')
-        this.$set(this, 'companyInfoGetBody', '')
+        this.$set(this.companyInfoGetBody, 'companyid', '')
+        // this.$set(this, 'companyInfoGetBody', '')
       }
       this.$http.post(Util.systemApi.companyGet, this.companyInfoGetBody)
           .then((response) => {
@@ -276,20 +351,30 @@ export default {
     openAddCompanyForm () {
       this.addCompanyFormVisible = true
     },
+    closeAddCompanyForm () {
+      this.$refs.addCompanyForm.resetFields()
+      this.addCompanyFormVisible = false
+    },
     handleAddCompany () {
-      this.$http.post(Util.systemApi.companyAdd, this.addCompanyForm)
+      this.$refs.addCompanyForm.validate((valid) => {
+        if (valid) {
+          this.$http.post(Util.systemApi.companyAdd, this.addCompanyForm)
           .then((response) => {
             if (response.data.code === '0') {
               Util.showError('新增公司失败', response.data.data)
             } else {
-              this.$set(this, 'tableData', response.data.data)
-              // console.log(response.data.data)
+              this.getCompanyInfo()
             }
           })
           .catch(function (response) {
             Util.showError('新增公司失败', '网络错误，请稍后重试')
           })
-      this.addCompanyFormVisible = false
+          this.addCompanyFormVisible = false
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     },
     openUpdateCompanyForm (row) {
       this.updateCompanyFormVisible = true
@@ -302,6 +387,9 @@ export default {
       this.$set(this.updateCompanyForm, 'address', row.address)
       this.$set(this.updateCompanyForm, 'baidulongitude', row.baidulongitude)
       this.$set(this.updateCompanyForm, 'baidulatitude', row.baidulatitude)
+      this.$set(this.updateCompanyForm, 'loginlogo', row.loginlogo)
+      this.$set(this.updateCompanyForm, 'backgroundimg', row.backgroundimg)
+      this.$set(this.updateCompanyForm, 'logo', row.logo)
       let temp = [{ name: '登陆页LOGO', url: row.loginlogo }]
       this.$set(this, 'loginlogoList', temp)
       temp = [{ name: '登陆页背景图', url: row.backgroundimg }]
@@ -347,6 +435,15 @@ export default {
     handleRemove (file, fileList) {
       console.log(file, fileList)
     },
+    handleLoginLogoRemove (file, fileList) {
+      this.loginlogoList = []
+    },
+    handleBgimgRemove (file, fileList) {
+      this.bgimgList = []
+    },
+    handleLogoRemove (file, fileList) {
+      this.logoList = []
+    },
     handlePreview (file) {
       console.log(file)
     },
@@ -368,6 +465,18 @@ export default {
     handleLogoUploadSuccess (response, file, fileList) {
       // console.log(response.data)
       this.$set(this.addCompanyForm, 'logo', response.data)
+    },
+    handleLoginLogoUploadSuccess2 (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.updateCompanyForm, 'loginlogo', response.data)
+    },
+    handleBackgroundimgUploadSuccess2 (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.updateCompanyForm, 'backgroundimg', response.data)
+    },
+    handleLogoUploadSuccess2 (response, file, fileList) {
+      // console.log(response.data)
+      this.$set(this.updateCompanyForm, 'logo', response.data)
     }
   },
   mounted: function () {
