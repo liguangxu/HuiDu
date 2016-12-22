@@ -19,6 +19,7 @@
         <el-table-column prop="portidx" label="通道编号" width="180" align="center"></el-table-column>
         <el-table-column prop="userdesc" label="监测因子" width="100" align="center"></el-table-column>
         <el-table-column prop="userunit" label="监测因子单位" width="100" align="center"></el-table-column>
+        <el-table-column prop="datatype" label="通道类型" width="100" align="center"></el-table-column>
         <el-table-column prop="usermaxdata" label="用户定义最大值" width="100" align="center"></el-table-column>
         <el-table-column prop="usermindata" label="用户定义最小值" width="100" align="center"></el-table-column>
         <el-table-column prop="scenename" label="所属场景" width="100" align="center"></el-table-column>

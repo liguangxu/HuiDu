@@ -83,13 +83,45 @@ export default {
         begintime: '',
         endtime: ''
       },
-      historyData: []
+      historyData: [],
+      myChart: null,
+      defaultOptions: {
+        title: {
+          text: '历史数据查询'
+        },
+        tooltip: {},
+        xAxis: {
+          data: []
+        },
+        yAxis: {},
+        series: [{
+          name: '',
+          type: 'line',
+          data: []
+        }]
+      }
     }
   },
   methods: {
+    getDefaultTimeGap () {
+      let end = new Date()
+      let start = new Date() - parseInt(60 * 10 * 1000)
+      let array = []
+      array.push(start)
+      array.push(end)
+      console.log('default time------')
+      console.log(array)
+      return array
+    },
     viewHistoryData (row) {
       this.dataChartVisible = true
+      // this.myChart = null
+      // this.myChart.setOption(null)
+      if (this.myChart !== null) {
+        this.myChart.clear()
+      }
       this.$set(this.historySearchBody, 'channel_id', row.channel_id)
+      this.$set(this, 'timegap', this.getDefaultTimeGap())
     },
     setHistoryEnterBody () {
       console.log('111111')
@@ -126,6 +158,7 @@ export default {
       this.$set(this.historySearchBody, 'begintime', begints)
       this.$set(this.historySearchBody, 'endtime', endts)
       console.log('historySearchBody------------------')
+      console.log(this.timegap)
       console.log(this.historySearchBody)
       this.$http.post(Util.historyApi.search, this.historySearchBody)
           .then((response) => {
@@ -137,10 +170,10 @@ export default {
                 yData.push(item.value)
                 xData.push(item.date)
               }
-              let myChart = echarts.init(document.getElementById('historydata-chart'))
+              this.myChart = echarts.init(document.getElementById('historydata-chart'))
               var option = {
                 title: {
-                  text: '折线图'
+                  text: '历史数据查询'
                 },
                 tooltip: {
                   trigger: 'axis'
@@ -180,7 +213,8 @@ export default {
                   }
                 ]
               }
-              myChart.setOption(option)
+              this.myChart.clear()
+              this.myChart.setOption(option, true)
             }
           })
           .catch(function (response) {

@@ -16,7 +16,11 @@
          @current-change="viewSpots">
             <el-table-column type="index" label="序号" width="180" align="center"></el-table-column>
             <el-table-column prop="name" label="场景名称" width="240" align="center"></el-table-column>
-            <el-table-column prop="image" label="场景图" align="center"></el-table-column>
+            <el-table-column prop="image" inline-template label="场景图" align="center">
+                    <div>
+                    <el-button size="small" type="primary" @click="viewSceneImg(row)">查看场景大图</el-button>
+                    </div>
+            </el-table-column>
             <el-table-column :context="_self" inline-template label="操作" width="300" align="center">
                   <div>
                     <!-- <el-button size="small" type="info" @click="viewSpots(row._id, row.name)">查看监测点</el-button> -->
@@ -45,7 +49,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="场景图：" :label-width="formLabelWidth">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" 
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleUploadSuccess"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -78,7 +82,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="场景图：" :label-width="formLabelWidth">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-remove="handleRemove"
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-remove="handleRemove" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleUpdateUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -169,6 +173,15 @@
         <el-button type="primary" @click="updateSpotFormVisible = false">确 定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="场景图查看" v-model="sceneImgVisible">
+      <span><img :src="sceneImgUrl" style="width:100%;height:100%;"></span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="sceneImgVisible = false">取 消</el-button>
+      <el-button type="primary" @click="sceneImgVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>  
 </template>
 <script>
@@ -177,6 +190,8 @@ import Util from '../utils/util.js'
 export default {
   data () {
     return {
+      sceneImgVisible: false,
+      sceneImgUrl: '',
       selectedScenename: '',
       fileList: [],
       sceneImg: { name: '', url: '' },
@@ -502,6 +517,14 @@ export default {
           })
       this.addSpotFormVisible = false
       // this.refreshUserInfo()
+    },
+    viewSceneImg (row) {
+      this.sceneImgVisible = true
+      this.sceneImgUrl = row.image
+    },
+    handlePreview (file) {
+      let temp = { image: file.url }
+      this.viewSceneImg(temp)
     }
   },
   mounted: function () {

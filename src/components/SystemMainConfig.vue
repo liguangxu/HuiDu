@@ -69,7 +69,7 @@
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
         	 <el-form-item label="登陆页LOGO" prop="loginlogo">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -83,7 +83,7 @@
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
         	 <el-form-item label="登陆页背景图" prop="backgroundimg">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess" 
               :default-file-list="fileList"
               :thumbnail-mode="true">
@@ -98,7 +98,7 @@
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
         	 <el-form-item label="左上角LOGO" prop="logo">
-              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore"
+              <el-upload :action="imgUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleLogoUploadSuccess" :default-file-list="fileList"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -156,7 +156,7 @@
               <el-upload :action="imgUploadUrl" type="drag" 
               :before-upload="handleUploadBefore" :on-remove="handleLoginLogoRemove"
               :on-error="handleUploadError" :on-success="handleLoginLogoUploadSuccess2" 
-              :default-file-list="loginlogoList"
+              :default-file-list="loginlogoList" :on-preview="handlePreview"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
                 <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -172,7 +172,7 @@
               <el-upload :action="imgUploadUrl" type="drag" 
               :before-upload="handleUploadBefore" :on-remove="handleBgimgRemove"
               :on-error="handleUploadError" :on-success="handleBackgroundimgUploadSuccess2" 
-              :default-file-list="bgimgList"
+              :default-file-list="bgimgList" :on-preview="handlePreview"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
                 <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -188,7 +188,7 @@
               <el-upload :action="imgUploadUrl" type="drag" 
               :before-upload="handleUploadBefore" :on-remove="handleLogoRemove"
               :on-error="handleUploadError" :on-success="handleLogoUploadSuccess2" 
-              :default-file-list="logoList"
+              :default-file-list="logoList" :on-preview="handlePreview"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
                 <div class="el-dragger__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -203,6 +203,15 @@
         <el-button type="primary" @click="handleUpdateCompany">确 定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="图片查看" v-model="imgViewVisible">
+      <span><img :src="imgViewUrl" style="width:100%;height:100%;"></span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="imgViewVisible = false">取 消</el-button>
+      <el-button type="primary" @click="imgViewVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
 	</div>
 </template>
 
@@ -212,13 +221,15 @@ import Util from '../utils/util.js'
 export default {
   data () {
     return {
+      imgViewVisible: false,
+      imgViewUrl: '',
       level: Util.getNowLevel(),
       companyName: '蓝丰科技有限公司',
       // updateCompanyLogo: false,
       logoList: [],
       bgimgList: [],
       loginlogoList: [],
-      companyInfoGetBody: { companyid: '' },
+      companyInfoGetBody: { _id: '' },
       addCompanyForm: {
         provice: '',
         city: '',
@@ -329,10 +340,10 @@ export default {
       if (level !== 0) {
         let nowUser = Util.localStorageGet('nowUser')
         let companyid = nowUser === null ? null : nowUser.companyid
-        this.$set(this.companyInfoGetBody, 'companyid', companyid)
+        this.$set(this.companyInfoGetBody, '_id', companyid)
         // this.$set(this, 'companyInfoGetBody', companyid)
       } else {
-        this.$set(this.companyInfoGetBody, 'companyid', '')
+        this.$set(this.companyInfoGetBody, '_id', '')
         // this.$set(this, 'companyInfoGetBody', '')
       }
       this.$http.post(Util.systemApi.companyGet, this.companyInfoGetBody)
@@ -445,7 +456,7 @@ export default {
       this.logoList = []
     },
     handlePreview (file) {
-      console.log(file)
+      this.viewImg(file.url)
     },
     handleUploadBefore (file) {
       console.log(file)
@@ -477,6 +488,10 @@ export default {
     handleLogoUploadSuccess2 (response, file, fileList) {
       // console.log(response.data)
       this.$set(this.updateCompanyForm, 'logo', response.data)
+    },
+    viewImg (url) {
+      this.imgViewVisible = true
+      this.imgViewUrl = url
     }
   },
   mounted: function () {

@@ -3,60 +3,22 @@
 		<el-row>
 			<el-col :span="2">&nbsp;</el-col>
 			<el-col :span="2" class="ctrl">
-				<img src="../../static/image/info/crtl_l.png" height="64" width="64" @click="ctrlleft">
+				<img v-if="factors.length > 7" src="../../static/image/info/crtl_l.png" height="64" 
+        width="64" 
+        @click="ctrlleft">
 			</el-col>
 			<el-col :span="16" class="factor-box">
 			<div class="factor-wrap" id="imgs">
         <div v-for="item in factors">
           <div class="factor">
-          <img src="../../static/image/info/02.png">
+          <img src="../../static/image/info/02.png" @click="getDataByFactor(item)">
           <span class="factor-desc">{{ item }}</span>
           </div>
         </div>
-				<!-- <div class="factor">
-					<img src="../../static/image/info/01.png">
-					<span class="factor-desc">监测因子1</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/02.png">
-					<span class="factor-desc">监测因子2</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/03.png">
-					<span class="factor-desc">监测因子3</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/04.png">
-					<span class="factor-desc">监测因子4</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/05.png">
-					<span class="factor-desc">监测因子5</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/06.png">
-					<span class="factor-desc">监测因子6</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/07.png">
-					<span class="factor-desc">监测因子7</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/08.png">
-					<span class="factor-desc">监测因子8</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/09.png">
-					<span class="factor-desc">监测因子9</span>
-				</div>
-				<div class="factor">
-					<img src="../../static/image/info/10.png">
-					<span class="factor-desc">监测因子10</span>
-				</div> -->
 				</div>
 			</el-col>
 			<el-col :span="2" class="ctrl">
-				<img src="../../static/image/info/ctrl_r.png" height="64" width="64" @click="ctrlright">
+				<img v-if="factors.length > 7" src="../../static/image/info/ctrl_r.png" height="64" width="64" @click="ctrlright">
 			</el-col>
 			<el-col :span="2">&nbsp;</el-col>
 		</el-row>
@@ -69,10 +31,12 @@
   export default {
     data () {
       return {
-        the_index: 0,
-        factors: []
+        the_index: 0
+        // factors: [],
+        // count: 0
       }
     },
+    props: ['factors'],
     methods: {
       ctrlleft: function () {
         if (this.the_index === 0) {
@@ -95,13 +59,18 @@
         imgs.style.marginLeft = 120 * this.the_index + 'px'
         // imgs.style.marginLeft = -100 + 'px'
       },
-      updateFactors (factors) {
-        this.$set(this, 'factors', factors)
+      // updateFactors (factors) {
+      //   this.$set(this, 'factors', factors)
+      //   this.$set(this, 'count', factors.length)
+      // },
+      getDataByFactor (item) {
+        console.log('111')
+        bus.$emit('currentFactor', item)
       }
-    },
-    mounted: function () {
-      bus.$on('factorsUpdate', this.updateFactors)
     }
+    // mounted: function () {
+    //   bus.$on('factorsUpdate', this.updateFactors)
+    // }
   }
 </script>
 
@@ -141,11 +110,12 @@
 .factor {
   margin-top: 12px;
   width: 100px;
-  display: inline-block;
+  /*display: inline-block;*/
+  float: left;
 }
 .factor img{
   height: 61px;
-  width: 61px;
+  width: 70px;
   padding: 3px;
   border-radius: 5px;
   box-shadow: 0px 0px 1px #aaa;	
@@ -156,6 +126,7 @@
 }
 .factor-desc {
   display: inline-block;
+  width: 70px;
 }
 .grid-content {
   border-radius: 4px;

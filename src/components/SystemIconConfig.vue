@@ -14,7 +14,12 @@
       <el-table :data="tableData" border>
         <el-table-column type="index" label="序号" width="140" align="center"></el-table-column>
         <el-table-column prop="userdesc" label="监测因子" width="180" align="center"></el-table-column>
-        <el-table-column prop="imgurl" label="Icon图片" align="center"></el-table-column>
+        <el-table-column prop="imgurl" inline-template label="Icon图片" align="center">
+          <div>
+            <el-button size="small" type="primary" @click="viewIconImg(row.imgurl)">查看Icon图片
+            </el-button>
+          </div>
+        </el-table-column>
         <el-table-column :context="_self" inline-template label="操作" align="center">
           <div>
             <el-button size="small" type="info" @click="openUpdateIconForm(row)">修改
@@ -43,7 +48,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="Icon图片">
-              <el-upload :action="iconUploadUrl" type="drag" :before-upload="handleUploadBefore" 
+              <el-upload :action="iconUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview" 
               :on-error="handleUploadError" :on-success="handleUploadSuccess"
               :thumbnail-mode="true">
                 <i class="el-icon-upload"></i>
@@ -73,7 +78,7 @@
               disabled></el-input>
             </el-form-item>
             <el-form-item label="Icon图片">
-              <el-upload :action="iconUploadUrl" type="drag" :before-upload="handleUploadBefore" 
+              <el-upload :action="iconUploadUrl" type="drag" :before-upload="handleUploadBefore" :on-preview="handlePreview"
               :on-error="handleUploadError" :on-success="handleUpdateUploadSuccess"
               :thumbnail-mode="true" :default-file-list="updateFileList">
                 <i class="el-icon-upload"></i>
@@ -90,6 +95,14 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="Icon图片查看" v-model="iconImgViewVisible">
+      <span><img :src="iconImgViewUrl" style="width:100%;height:100%;"></span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="iconImgViewVisible = false">取 消</el-button>
+      <el-button type="primary" @click="iconImgViewVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
 	</div>
 </template>
 
@@ -99,6 +112,8 @@ import Util from '../utils/util.js'
 export default {
   data () {
     return {
+      iconImgViewVisible: false,
+      iconImgViewUrl: '',
       tableData: [],
       IconGetBody: '2x',
       addIconFormVisible: false,
@@ -235,6 +250,13 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+    viewIconImg (url) {
+      this.iconImgViewVisible = true
+      this.iconImgViewUrl = url
+    },
+    handlePreview (file) {
+      this.viewIconImg(file.url)
     }
   },
   mounted: function () {

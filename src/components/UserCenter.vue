@@ -13,7 +13,7 @@
 		<el-row>
 			<el-col :span="2">&nbsp;</el-col>
 			<el-col :span="20">
-				 <el-table :data="userTableData" stripe border>
+				 <el-table v-loading.body="loading" :data="userTableData" stripe border>
     				<el-table-column type="index" label="序号" width="100" align="center"></el-table-column>
     				<el-table-column prop="name" label="姓名" width="140" align="center"></el-table-column>
     				<el-table-column prop="username" label="用户名" width="140" align="center"></el-table-column>
@@ -22,10 +22,11 @@
     				<el-table-column prop="email" label="邮箱" width="180" align="center"></el-table-column>
     				<el-table-column prop="address" label="地址" width="240" align="center"></el-table-column>
             <el-table-column prop="desc" label="备注" align="center"></el-table-column>
-    				<el-table-column :context="_self" inline-template label="操作" width="160" 
-            align="center">
+    				<el-table-column :context="_self" inline-template label="操作" width="300" 
+            fixed="right" align="center">
           				<div>
-            				<el-button size="small" type="primary" @click="userEdit(row)">修改</el-button>
+            				<el-button size="small" type="info" @click="userEdit(row)">修改基本信息</el-button>
+                    <el-button size="small" type="primary" @click="userEditPassword(row)">修改密码</el-button>
             				<el-button size="small" type="danger" @click="userDelete(row)">删除</el-button>
           				</div>
         			</el-table-column>
@@ -44,14 +45,11 @@
             <el-form-item label="用户名" prop="username">
                 <el-input v-model="userEditForm.username" placeholder="请输入用户名" class="input-content"></el-input>
             </el-form-item>
-            <el-form-item label="密码" prop="password">
-                <el-input v-model="userEditForm.password" placeholder="请输入密码" class="input-content"></el-input>
-            </el-form-item>
-            <el-form-item label="确认密码" prop="password2">
-                <el-input v-model="userEditForm.password2" placeholder="请再次输入密码确认" class="input-content"></el-input>
-            </el-form-item>
             <el-form-item label="备注" prop="desc">
                 <el-input v-model="userEditForm.desc" placeholder="请输入备注" class="input-content"></el-input>
+            </el-form-item>
+            <el-form-item label="地址" prop="address">
+                <el-input v-model="userEditForm.address" placeholder="请输入地址" class="input-content"></el-input>
             </el-form-item>
             <el-form-item label="所属公司" prop="companyid">
                 <el-select v-model="userEditForm.companyid" 
@@ -76,9 +74,6 @@
             <el-form-item label="微信" prop="weixin">
                 <el-input v-model="userEditForm.weixin" placeholder="请输入微信" class="input-content"></el-input>
             </el-form-item>
-            <el-form-item label="地址" prop="address">
-                <el-input v-model="userEditForm.address" placeholder="请输入地址" class="input-content"></el-input>
-            </el-form-item>
             <el-form-item label="权限" prop="level">
                 <el-select v-model="userEditForm.level" placeholder="请选择权限">
                 <el-option v-for="item in levelOptions" :label="item.label" :value="item.value + ''">
@@ -93,14 +88,17 @@
       <el-card>
         <div slot="header" class="clearfix">
           <span style="line-height: 36px;">请选择所属监测点</span>
-          <el-button style="float: right;" type="primary" @click="setSpotOptions">点击查询所有监测点</el-button>
+          <el-button style="float: right;" type="primary" @click="setSelectedSpotOptions">点击查询所有监测点</el-button>
+          <!-- <el-button style="float: right;" type="primary" @click="test">test</el-button> -->
         </div>
         <div>
           <el-row>
             <el-col :span="1">&nbsp;</el-col>
             <el-col :span="22">
-              <el-tree :data="spotOptions" :props="props" :load="getSceneSpots" 
+              <el-tree ref="editUserSpotsTree" :data="spotOptions" node-key="id" :props="props" :show-checkbox="true"
+              :load="getSelectedSceneSpots"
               @node-click="handleEditNodeClick" :default-checked-keys="defaultSpotsList"
+              :expand-on-click-node="true" :default-expand-all="true"
               @check-change="handleEditCheckChange" lazy show-checkbox>
               </el-tree>
             </el-col>
@@ -185,7 +183,7 @@
           <el-row>
             <el-col :span="1">&nbsp;</el-col>
             <el-col :span="22">
-              <el-tree :data="spotOptions" :props="props" :load="getSceneSpots" @node-click="handleNodeClick" 
+              <el-tree :data="spotOptions" :props="props" :load="getSceneSpots" @node-click="handleNodeClick" :expand-on-click-node="true" :default-expand-all="true"
               @check-change="handleCheckChange" lazy show-checkbox>
               </el-tree>
             </el-col>
@@ -201,6 +199,26 @@
           <el-button type="primary" @click="handleAddSubmit">确 定</el-button>
         </div>
     </el-dialog>
+
+    <el-dialog title="修改密码" v-model="userEditPasswordFormVisible" class="content">
+    <el-form ref="userEditPasswordForm" :model="userEditPasswordForm" :rules="rules3" label-width="100px" label-position="left">
+        <el-row>
+          <el-col :span="1">&nbsp;</el-col>
+          <el-col :span="20">
+            <el-form-item label="新密码" prop="password">
+                <el-input v-model="userEditPasswordForm.password" placeholder="请输入新密码" class="input-content"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="password2">
+                <el-input v-model="userEditPasswordForm.password2" placeholder="请再次输入密码确认" class="input-content"></el-input>
+            </el-form-item>
+      </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="closeUpdateUserPasswordForm">取 消</el-button>
+          <el-button type="primary" @click="handleEditPasswordSubmit">确 定</el-button>
+        </div>
+    </el-dialog>  
+
 	</div>
 </template>
 
@@ -213,8 +231,8 @@ export default {
       if (value === '') {
         callback(new Error('密码不能为空'))
       } else {
-        if (this.userEditForm.password2 !== '') {
-          this.$refs.userEditForm.validateField('password2')
+        if (this.userEditPasswordForm.password2 !== '') {
+          this.$refs.userEditPasswordForm.validateField('password2')
         }
         callback()
       }
@@ -222,13 +240,14 @@ export default {
     var validatePassword2 = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'))
-      } else if (value !== this.userEditForm.password) {
+      } else if (value !== this.userEditPasswordForm.password) {
         callback(new Error('两次输入密码不一致!'))
       } else {
         callback()
       }
     }
     return {
+      loading: false,
       defaultSpotsList: [],
       nowCompanyname: this.getNowCompanyname(),
       companyOptions: [],
@@ -236,14 +255,30 @@ export default {
       userGetBody: { userid: '' },
       userDeleteBody: { _id: '' },
       userEditFormVisible: false,
+      userEditPasswordFormVisible: false,
       userAddFormVisible: false,
+      userEditPasswordForm: {
+        _id: '',
+        password: '',
+        password2: '',
+        name: '',
+        username: '',
+        level: '',
+        companyid: '',
+        job: '',
+        phone: '',
+        email: '',
+        address: '',
+        desc: '',
+        weixin: '',
+        ownspotlist: []
+      },
       userEditForm: {
         _id: '',
         name: '',
         username: '',
-        level: '',
         password: '',
-        password2: '',
+        level: '',
         companyid: '',
         job: '',
         phone: '',
@@ -317,12 +352,6 @@ export default {
         username: [
           { required: true, message: '用户名不能为空', trigger: 'change' }
         ],
-        password: [
-          { required: true, validator: validatePassword1, trigger: 'change' }
-        ],
-        password2: [
-          { required: true, validator: validatePassword2, trigger: 'change' }
-        ],
         desc: [
           { required: true, message: '备注不能为空', trigger: 'change' }
         ],
@@ -346,6 +375,14 @@ export default {
         ],
         level: [
           { required: true, message: '权限等级不能为空', trigger: 'change' }
+        ]
+      },
+      rules3: {
+        password: [
+          { required: true, validator: validatePassword1, trigger: 'change' }
+        ],
+        password2: [
+          { required: true, validator: validatePassword2, trigger: 'change' }
         ]
       }
     }
@@ -391,15 +428,19 @@ export default {
       }
       if (node.level === 1) {
         let body = { sceneid: node.data.id }
+        console.log('node get spots--------------------')
+        console.log(body)
         if (node.data.id !== null && node.data.id !== undefined) {
           this.$http.post(Util.userApi.spotGet, body)
             .then((response) => {
               // console.log(response)
               if (response.data.code === '0') {
-                Util.showError('获取监测点数据失败', response.data.data)
+                // Util.showError('获取监测点数据失败', response.data.data)
               } else {
                 let temp = response.data.data
-                console.log(temp)
+                // console.log('node get spots--------------------')
+                // console.log(body)
+                // console.log(temp)
                 let item = []
                 for (var j = 0; j < temp.length; j++) {
                   let childItem = { label: temp[j].spotlocation, spotid: temp[j].spotid, sceneid: temp[j].sceneid }
@@ -414,6 +455,70 @@ export default {
         }
       }
     },
+    setSelectedSpotOptions () {
+      let scenes = Util.getCompanyScenes()
+      let tempOptions = []
+      for (var i = 0; i < scenes.length; i++) {
+        let item = { id: i, label: scenes[i].name, sceneid: scenes[i]._id, children: [] }
+        tempOptions.push(item)
+      }
+      this.$set(this, 'spotOptions', tempOptions)
+      // this.$set(this, 'defaultSpotsList', Util.getSelectedSpots())
+      // this.$refs.editUserSpotsTree.getCheckedKeys()
+      // this.$refs.editUserSpotsTree.setCheckedNodes([1, 2])
+    },
+    getSelectedSceneSpots (node, resolve) {
+      if (node.level > 1) {
+        return resolve([])
+      }
+      if (node.level === 1) {
+        let body = { sceneid: node.data.sceneid }
+        // console.log('node get spots--------------------')
+        // console.log(body)
+        // console.log('node key--------------------')
+        // console.log(node.key)
+        if (node.data.sceneid !== null && node.data.sceneid !== undefined) {
+          this.$http.post(Util.userApi.spotGet, body)
+            .then((response) => {
+              // console.log(response)
+              if (response.data.code === '0') {
+                // Util.showError('获取监测点数据失败', response.data.data)
+              } else {
+                let temp = response.data.data
+                console.log('node get spots--------------------')
+                console.log(body)
+                // console.log(temp)
+                let item = []
+                for (var j = 0; j < temp.length; j++) {
+                  let tmp = temp[j].sceneid + '' + temp[j].spotid
+                  let childItem = { id: tmp, label: temp[j].spotlocation, spotid: temp[j].spotid, sceneid: temp[j].sceneid }
+                  item.push(childItem)
+                }
+                resolve(item)
+              }
+            })
+            .catch(function (response) {
+              Util.showError('获取监测点数据失败', '网络错误，请稍后重试')
+            })
+          let tmpSpots = Util.getSelectedSpots()
+          let tmpKeys = []
+          for (let k = 0; k < tmpSpots.length; k++) {
+            let tmpKey = tmpSpots[k].sceneid + '' + tmpSpots[k].spotid
+            tmpKeys.push(tmpKey)
+          }
+          this.$refs.editUserSpotsTree.setCheckedKeys(tmpKeys, true)
+          this.$set(this.userEditForm, 'ownspotlist', tmpSpots)
+          // console.log('set here----------')
+          // console.log(tmp)
+        }
+      }
+    },
+    // test () {
+    //   console.log('test----------')
+    //   let tmp = Util.getSelectedSpots()
+    //   let tmp1 = tmp[0].sceneid + '' + tmp[0].spotid
+    //   this.$refs.editUserSpotsTree.setCheckedKeys([tmp1])
+    // },
     handleNodeClick (data) {
       // console.log(data)
       // this.$set(this.userAddForm, 'ownspotlist', data)
@@ -469,8 +574,14 @@ export default {
         temp.splice(idx, 1)
       }
       this.$set(this.userAddForm, 'ownspotlist', temp)
+      console.log('------ppppppppppp123')
+      console.log(temp)
     },
     handleEditCheckChange (data, checked, indeterminate) {
+      console.log('check change----------------')
+      console.log(data)
+      // console.log('get checked keys----------------')
+      // console.log(this.$refs.editUserSpotsTree.getCheckedNodes())
       let temp = this.userEditForm.ownspotlist
       let spot = { spotid: data.spotid, spotlocation: data.label, sceneid: data.sceneid }
       if (checked) {
@@ -499,6 +610,25 @@ export default {
             if (response.data.code === '0') {
               Util.showError('获取公司数据失败', response.data.data)
             } else {
+              this.$set(this, 'companyOptions', response.data.data)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取公司数据失败', '网络错误，请稍后重试')
+          })
+      } else if (level === 1) {
+        let nowUser = Util.localStorageGet('nowUser')
+        let companyid = nowUser === null ? null : nowUser.companyid
+        let body = { companyid: companyid }
+        console.log('level 1-----------hhh')
+        console.log(body)
+        this.$http.post(Util.userApi.oneCompanyGet, body)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('获取公司数据失败', response.data.data)
+            } else {
+              console.log('level 1-----------')
+              console.log(response.data)
               this.$set(this, 'companyOptions', response.data.data)
             }
           })
@@ -538,15 +668,15 @@ export default {
       let level = Util.getNowLevel()
       if (level === 0) {
         this.levelOptions = [
-          { label: '0', value: 0 },
-          { label: '1', value: 1 },
-          { label: '2', value: 2 },
-          { label: '3', value: 3 }]
+          { label: '超级管理员', value: 0 },
+          { label: '公司管理员', value: 1 },
+          { label: '操作员', value: 2 },
+          { label: '普通用户', value: 3 }]
       } else {
         this.levelOptions = [
-          { label: '1', value: 1 },
-          { label: '2', value: 2 },
-          { label: '3', value: 3 }]
+          { label: '公司管理员', value: 1 },
+          { label: '操作员', value: 2 },
+          { label: '普通用户', value: 3 }]
       }
     },
     userEdit (row) {
@@ -562,6 +692,9 @@ export default {
       this.$set(this.userEditForm, 'address', row.address)
       this.$set(this.userEditForm, 'level', row.level + '')
       this.$set(this.userEditForm, 'companyid', row.companyid)
+      this.$set(this.userEditForm, 'ownchannel', row.ownchannel)
+      console.log('row.ownchannel-----------------')
+      console.log(row.ownchannel)
       // this.companyOptions = null
       // this.spotOptions = []
       this.getCompanys()
@@ -569,6 +702,23 @@ export default {
       // this.setSpotOptions()
       // console.log(row.address)
       this.$set(this, 'spotOptions', [])
+      let spotBody = { _id: row._id }
+      this.$http.post(Util.userApi.currentSpotGet, spotBody)
+        .then((response) => {
+          if (response.data.code === '0') {
+            // Util.showError('获取已勾选监测点数据失败', response.data.data)
+            Util.setSelectedSpots([])
+          } else {
+            let temp = response.data.data
+            console.log('selected spots--------------------')
+            console.log(temp)
+            Util.setSelectedSpots(temp)
+          }
+        })
+        .catch(function (response) {
+          Util.showError('获取已勾选监测点数据失败', '网络错误，请稍后重试')
+          Util.setSelectedSpots([])
+        })
     },
     userDelete (row) {
       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
@@ -591,6 +741,7 @@ export default {
       })
     },
     getUsers () {
+      this.loading = true
       let nowUser = Util.localStorageGet('nowUser')
       let userid = nowUser === null ? null : nowUser._id
       this.$set(this.userGetBody, 'userid', userid)
@@ -603,7 +754,10 @@ export default {
           if (response.data.code === '0') {
             Util.showError('获取用户数据失败', response.data.data)
           } else {
+            console.log('userGetBack233333333-------------------')
+            console.log(response.data.data)
             this.$set(this, 'userTableData', response.data.data)
+            this.loading = false
           }
         })
         .catch(function (response) {
@@ -618,13 +772,13 @@ export default {
       this.$http.post(Util.userApi.add, this.userAddForm)
         .then((response) => {
           if (response.data.code === '0') {
-            this.showError('添加用户失败', '请稍后再试')
+            Util.showError('添加用户失败', response.data.data)
           } else {
             this.getUsers()
           }
         })
         .catch(function (response) {
-          this.showError('添加用户失败', '网络错误，请稍后再试')
+          Util.showError('添加用户失败', '网络错误，请稍后再试')
         })
       this.userAddFormVisible = false
     },
@@ -633,12 +787,12 @@ export default {
         this.$set(this.userEditForm, 'companyid', Util.getNowCompanyid())
       }
       this.$set(this.userEditForm, 'level', Number(this.userEditForm.level))
-      console.log('updateUserBody--------------')
-      console.log(this.userEditForm)
+      // console.log('updateUserBody--------------')
+      // console.log(this.userEditForm)
       this.$http.post(Util.userApi.update, this.userEditForm)
         .then((response) => {
           if (response.data.code === '0') {
-            this.showError('修改用户失败', '请稍后再试')
+            Util.showError('修改用户失败', response.data.data)
           } else {
             console.log('updateUserBack--------------')
             console.log(response.data)
@@ -646,7 +800,7 @@ export default {
           }
         })
         .catch(function (response) {
-          this.showError('修改用户失败', '网络错误，请稍后再试')
+          Util.showError('修改用户失败', '网络错误，请稍后再试')
         })
       this.userEditFormVisible = false
     },
@@ -655,13 +809,13 @@ export default {
       this.$http.post(Util.userApi.delete, this.userDeleteBody)
         .then((response) => {
           if (response.data.code === '0') {
-            this.showError('删除用户失败', '请稍后再试')
+            Util.showError('删除用户失败', '请稍后再试')
           } else {
             this.getUsers()
           }
         })
         .catch(function (response) {
-          this.showError('删除用户失败', '网络错误，请稍后再试')
+          Util.showError('删除用户失败', '网络错误，请稍后再试')
         })
     },
     handleAddSubmit (ev) {
@@ -670,6 +824,7 @@ export default {
           console.log('---------kkkkkkkkkkkkkk')
           console.log(this.userAddForm)
           this.addUser()
+          this.$refs.userAddForm.resetFields()
           this.refreshUserInfo()
         } else {
           console.log('error submit!!')
@@ -696,6 +851,7 @@ export default {
       this.getCompanys()
       this.setLevelOptions()
       this.$set(this, 'spotOptions', [])
+      this.$set(this.userAddForm, 'ownspotlist', [])
     },
     closeAddUserForm () {
       this.$refs.userAddForm.resetFields()
@@ -704,6 +860,54 @@ export default {
     closeUpdateUserForm () {
       this.$refs.userEditForm.resetFields()
       this.userEditFormVisible = false
+    },
+    userEditPassword (row) {
+      this.userEditPasswordFormVisible = true
+      this.$set(this.userEditPasswordForm, '_id', row._id)
+      this.$set(this.userEditPasswordForm, 'name', row.name)
+      this.$set(this.userEditPasswordForm, 'username', row.username)
+      this.$set(this.userEditPasswordForm, 'desc', row.desc)
+      this.$set(this.userEditPasswordForm, 'job', row.job)
+      this.$set(this.userEditPasswordForm, 'phone', row.phone)
+      this.$set(this.userEditPasswordForm, 'email', row.email)
+      this.$set(this.userEditPasswordForm, 'weixin', row.weixin)
+      this.$set(this.userEditPasswordForm, 'address', row.address)
+      this.$set(this.userEditPasswordForm, 'level', row.level + '')
+      this.$set(this.userEditPasswordForm, 'companyid', row.companyid)
+      this.$set(this.userEditPasswordForm, 'ownchannel', row.ownchannel)
+    },
+    closeUpdateUserPasswordForm () {
+      this.$refs.userEditPasswordForm.resetFields()
+      this.userEditPasswordFormVisible = false
+    },
+    editUserPassword () {
+      this.$http.post(Util.userApi.update, this.userEditPasswordForm)
+        .then((response) => {
+          if (response.data.code === '0') {
+            Util.showError('修改用户密码失败', response.data.data)
+          } else {
+            console.log('updateUserBackPassword--------------')
+            console.log(response.data)
+            this.getUsers()
+          }
+        })
+        .catch(function (response) {
+          Util.showError('修改用户密码失败', '网络错误，请稍后再试')
+        })
+      this.userEditPasswordFormVisible = false
+    },
+    handleEditPasswordSubmit () {
+      this.$refs.userEditPasswordForm.validate((valid) => {
+        if (valid) {
+          console.log('---------ppppppppppp')
+          console.log(this.userEditPasswordForm)
+          this.editUserPassword()
+          this.refreshUserInfo()
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     }
   },
   mounted: function () {

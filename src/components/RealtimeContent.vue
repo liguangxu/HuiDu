@@ -9,7 +9,7 @@
     <el-row>
       <el-col :span="2">&nbsp;</el-col>
       <el-col :span="20" class="realtime-factor">
-        <my-factor></my-factor>
+        <my-factor :factors="factors"></my-factor>
       </el-col>
       <el-col :span="2">&nbsp;</el-col>
     </el-row>
@@ -22,10 +22,12 @@
 				<el-tabs type="card" class="realtime-form">
 					<el-tab-pane label="表格">
           <!-- <transition> -->
-						<my-realtimetable></my-realtimetable>
+						<my-realtimetable :tableData="tableData" :loading="loading"></my-realtimetable>
             <!-- <transition> -->
 					</el-tab-pane>
-					<el-tab-pane label="图标">图标</el-tab-pane>
+					<el-tab-pane label="图标">
+            <my-realtimeicon :iconData="iconData"></my-realtimeicon>
+          </el-tab-pane>
 					<el-tab-pane label="场景">场景</el-tab-pane>
 				</el-tabs>
 			</el-col>
@@ -33,25 +35,43 @@
 		</el-row>
 		<br>
 		<div class="block">
-			<el-pagination :page-size="8" layout="prev, pager, next, jumper" :total="1000">
-			</el-pagination>
+			<!-- <el-pagination :page-size="8" layout="prev, pager, next, jumper" :total="1000">
+			</el-pagination> -->
 		</div>
 	</div>
 </template>
 
 <script>
 import MyRealtimeTable from './RealtimeTable.vue'
+import MyRealtimeIcon from './RealtimeIcon.vue'
 import MyFactor from './Factor.vue'
+import Util from '../utils/util.js'
+import { bus } from '../utils/bus.js'
 
 export default {
   data () {
     return {
-      list: [{}]
+      loading: false,
+      intervalid: '',
+      list: [{}],
+      tableData: [],
+      iconData: [],
+      factors: [],
+      nowFactor: '',
+      hasSendFactors: false,
+      realtimeGetBody: {
+        userid: '',
+        pagenum: '1',
+        sceneid: '',
+        factor: ''
+      },
+      controlBody: { channel_id: '', value: '' }
     }
   },
   components: {
     'my-realtimetable': MyRealtimeTable,
-    'my-factor': MyFactor
+    'my-factor': MyFactor,
+    'my-realtimeicon': MyRealtimeIcon
   },
   methods: {
     formatTime () {
@@ -63,9 +83,84 @@ export default {
       let minute = date.getMinutes()
       let second = date.getSeconds()
       return (year + ' 年 ' + month + ' 月 ' + day + ' 日 ' + hour + ' 时 ' + minute + ' 分 ' + second + ' 秒 ')
+    },
+    setRealtimeGetBody () {
+      let userid = null
+      let nowUser = Util.localStorageGet('nowUser')
+      if (nowUser != null) {
+        userid = nowUser._id
+      }
+      let sceneid = Util.getNowSceneid()
+      console.log('sceneid----------------')
+      console.log(sceneid)
+      this.$set(this.realtimeGetBody, 'userid', userid)
+      this.$set(this.realtimeGetBody, 'sceneid', sceneid)
+      this.$set(this.realtimeGetBody, 'factor', this.nowFactor)
+    },
+    getData () {
+      this.setRealtimeGetBody()
+      console.log('realtimeGetBody---------------')
+      console.log(this.realtimeGetBody)
+      if (this.realtimeGetBody.sceneid !== null) {
+        this.loading = true
+        this.$http.post(Util.realtimeApi.get, this.realtimeGetBody)
+          .then((response) => {
+            console.log('response code : ')
+            console.log(response)
+            if (response.data.code === '0') {
+              Util.showError('获取实时监控数据失败', response.data.data)
+            } else {
+              console.log('realtimeGetBack---------------')
+              console.log(response.data)
+              this.$set(this, 'tableData', response.data.data)
+              this.$set(this, 'iconData', response.data.data)
+              if (!this.hasSendFactors) {
+                this.$set(this, 'factors', response.data.factorList)
+                this.hasSendFactors = true
+              }
+              this.loading = false
+              // Util.setFactors(response.data.factorList)
+              // bus.$emit('factorsUpdate', response.data.factorList)
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取实时监控数据失败', '网络断开，请稍后再试')
+          })
+      }
+    },
+    handleRouteChange () {
+      let sceneid = this.$route.params.sceneid
+      Util.setNowSceneid(sceneid, null)
+      this.nowFactor = ''
+      this.hasSendFactors = false
+      this.getData()
+    },
+    updateCurrentFactor (currentFactor) {
+      this.$set(this, 'nowFactor', currentFactor)
+      this.getData()
     }
   },
-  filters: {
+  watch: {
+    $route () {
+      this.handleRouteChange()
+    }
+  },
+  mounted: function () {
+    console.log('getData here-------')
+    this.getData()
+    this.intervalid = setInterval(() => {
+      this.getData()
+    }, 30000)
+    bus.$on('currentFactor', this.updateCurrentFactor)
+  },
+  // beforeUpdate: function () {
+  //   let self = this
+  //   setInterval(function () {
+  //     self.getData()
+  //   }, 3000)
+  // },
+  beforeDestroy: function () {
+    clearInterval(this.intervalid)
   },
   created: function () {
     let self = this

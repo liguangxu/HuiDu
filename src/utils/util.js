@@ -11,8 +11,10 @@ export default new Vue({
         update: this.getBaseApi() + 'user/update',
         sceneGet: this.getBaseApi() + 'user/getCompanyScenes',
         companyGet: this.getBaseApi() + 'user/getAllCompany',
+        oneCompanyGet: this.getBaseApi() + 'system/getCompanyByCompanyid',
         spotGet: this.getBaseApi() + 'user/getSceneSpots',
-        currentDataGet: this.getBaseApi() + 'user/getusercurrentdata'
+        currentDataGet: this.getBaseApi() + 'user/getusercurrentdata',
+        currentSpotGet: this.getBaseApi() + 'user/querycurrentspot'
       },
       realtimeApi: {
         get: this.getBaseApi() + 'realtime/get',
@@ -52,7 +54,9 @@ export default new Vue({
   },
   methods: {
     getBaseApi () {
-      return 'api/'
+      // return 'api/'
+      // return 'http://localhost:8888/'
+      return '/'
     },
     showError (title, info) {
       this.$notify.error({
@@ -147,6 +151,22 @@ export default new Vue({
     },
     getFactors () {
       return this.localStorageGet('factorList')
+    },
+    setSelectedSpots (list) {
+      this.localStorageSet('selectedSpots', list)
+    },
+    getSelectedSpots () {
+      return this.localStorageGet('selectedSpots')
+    },
+    setCurrentFactor (name) {
+      this.localStorageSet('currentFactor', name)
+    },
+    getCurrentFactor () {
+      let result = this.localStorageGet('currentFactor')
+      if (result === null) {
+        result = ''
+      }
+      return result
     }
   }
 })

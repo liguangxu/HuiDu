@@ -76,7 +76,7 @@ export default {
 .navbar {
   top: 0px;
   left: 0px;
-  min-width: 1024px;
+  min-width: 1200px;
 }
 .header {
   background-color: #1F2D3D;
@@ -89,5 +89,6 @@ export default {
 }
 .navbar-item {
   float: right;
+  /*min-width: 1024px;*/
 }
 </style>
