@@ -1,5 +1,5 @@
 <template>
-  <div class="history-content">
+  <div v-loading.body="loading" class="history-content">
     <el-row>
       <el-col :span="2">&nbsp;</el-col>
       <el-col :span="20">
@@ -17,19 +17,7 @@
       </el-table>
       </el-col>
       </el-row>
-      <br>
-      <el-row>
-      <el-col :span="2">&nbsp;</el-col>
-      <el-col :span="20">
-      <el-pagination
-        :current-page="currentPage1"
-        :page-size="10"
-        layout="prev, pager, next, jumper"
-        :total="1000">
-      </el-pagination>
-      </el-col>
-
-      <el-dialog title="查看历史数据" v-model="dataChartVisible">
+      <!-- <el-dialog title="查看历史数据" v-model="dataChartVisible">
       <el-row>
         <el-col :span="14">
           <div class="block">
@@ -46,7 +34,41 @@
         <el-col :span="24">
           <div id="historydata-chart">
           </div>
-          <!-- <my-historycharts></my-historycharts> -->
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dataChartVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dataChartVisible = false">确 定</el-button>
+      </div>
+    </el-dialog> -->
+
+    <el-dialog title="查看历史数据" v-model="dataChartVisible">
+      <el-row>
+        <el-col :span="20" style="text-align:left;">
+          <div>
+          <span class="demonstration">选择开始时间：</span>
+          <el-date-picker v-model="selectedStarttime" type="datetime" placeholder="选择开始时间"style="width:350px">
+          </el-date-picker>
+          </div>
+          </el-col>
+          </el-row>
+          <el-row><br>
+          <el-col :span="20" style="text-align:left;">
+          <div>
+          <span>选择结束时间：</span>
+          <el-date-picker v-model="selectedEndtime" type="datetime" placeholder="选择结束时间"style="width:350px">
+          </el-date-picker>
+          </div>
+          </el-col>
+          <el-col :span="4">
+            <el-button type="primary" style="width:100%" @click="searchHistoryData">点击查询</el-button>
+          </el-col>
+      </el-row>
+      <br>
+      <el-row>
+        <el-col :span="24">
+          <div id="historydata-chart">
+          </div>
         </el-col>
       </el-row>
       <div slot="footer" class="dialog-footer">
@@ -69,7 +91,10 @@ export default {
   },
   data () {
     return {
+      loading: false,
       timegap: '',
+      selectedStarttime: '',
+      selectedEndtime: '',
       dataChartVisible: false,
       currentPage1: 1,
       historyEnterBody: {
@@ -122,6 +147,8 @@ export default {
       }
       this.$set(this.historySearchBody, 'channel_id', row.channel_id)
       this.$set(this, 'timegap', this.getDefaultTimeGap())
+      this.$set(this, 'selectedStarttime', this.getDefaultTimeGap()[0])
+      this.$set(this, 'selectedEndtime', this.getDefaultTimeGap()[1])
     },
     setHistoryEnterBody () {
       console.log('111111')
@@ -135,6 +162,7 @@ export default {
       this.$set(this.historyEnterBody, 'sceneid', sceneid)
     },
     getData () {
+      this.loading = true
       this.setHistoryEnterBody()
       this.$http.post(Util.historyApi.enter, this.historyEnterBody)
           .then((response) => {
@@ -144,6 +172,7 @@ export default {
               this.$set(this, 'historyData', response.data.data)
               console.log('history sidebar : ----------------------')
               console.log(response.data)
+              this.loading = false
             }
           })
           .catch(function (response) {
@@ -151,26 +180,37 @@ export default {
           })
     },
     searchHistoryData () {
-      let begints = Math.round(this.timegap[0])
-      let endts = Math.round(this.timegap[1])
+      let begints = Math.round(this.selectedStarttime)
+      let endts = Math.round(this.selectedEndtime)
       let yData = []
       let xData = []
       this.$set(this.historySearchBody, 'begintime', begints)
       this.$set(this.historySearchBody, 'endtime', endts)
       console.log('historySearchBody------------------')
-      console.log(this.timegap)
+      console.log(this.selectedStarttime)
+      console.log(this.selectedEndtime)
       console.log(this.historySearchBody)
+      if (this.myChart !== null) {
+        this.myChart.showLoading()
+      } else {
+        this.myChart = echarts.init(document.getElementById('historydata-chart'))
+        this.myChart.showLoading()
+      }
       this.$http.post(Util.historyApi.search, this.historySearchBody)
           .then((response) => {
             if (response.data.code === '0') {
               Util.showError('获取阶段历史数据失败', response.data.data)
+              this.myChart.hideLoading()
             } else {
               for (var i = 0; i < response.data.data.length; i++) {
                 let item = response.data.data[i]
                 yData.push(item.value)
                 xData.push(item.date)
               }
-              this.myChart = echarts.init(document.getElementById('historydata-chart'))
+              if (this.myChart === null) {
+                this.myChart = echarts.init(document.getElementById('historydata-chart'))
+              }
+              this.myChart.hideLoading()
               var option = {
                 title: {
                   text: '历史数据查询'
@@ -219,6 +259,7 @@ export default {
           })
           .catch(function (response) {
             Util.showError('获取阶段历史数据失败', '网络断开，请稍后再试')
+            this.myChart.hideLoading()
           })
     },
     handleRouteChange () {

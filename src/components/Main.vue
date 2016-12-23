@@ -2,15 +2,18 @@
 	<div>
 		<my-header></my-header>
 		<router-view></router-view>
+    <my-footer></my-footer>
 	</div>
 </template>
 
 <script>
 import MyHeader from './Header.vue'
+import MyFooter from './Footer.vue'
 
 export default {
   components: {
-    'my-header': MyHeader
+    'my-header': MyHeader,
+    'my-footer': MyFooter
   }
 }
 </script>

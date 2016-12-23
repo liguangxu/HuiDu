@@ -2,8 +2,11 @@
 	<div>
 		<div class="navbar">
 			<el-menu theme="dark" class="header" v-bind:default-active="path" mode="horizontal" router>
-					<el-menu-item index="0" class="navbar-logo navbar-font">蓝丰科技工业物联网监控云平台</el-menu-item>
+					<el-menu-item index="0" class="navbar-logo navbar-font"><img :src="logoImg" width="300" height="30">
+          </el-menu-item>
 				<div class="navbar-item">
+          <el-menu-item index="0" class="navbar-logo navbar-font"><i class="fa fa-user-o" aria-hidden="true"></i>
+          : {{ currentUsername }}</el-menu-item>
 					<el-menu-item v-if="1" index="/main/realtime" class="navbar-font">
 						<i class="fa fa-video-camera" aria-hidden="true"></i> 实时监控
 					</el-menu-item>
@@ -28,12 +31,16 @@
 </template>
 
 <script>
+import Util from '../utils/util.js'
+
 export default {
   data () {
     return {
       // path: this.$route.path === '/main' ? '/main/realtime' : this.$route.path
       path: this.getCurrentPath(),
-      level: this.getLevel()
+      level: this.getLevel(),
+      currentUsername: this.getUsername(),
+      logoImg: this.getLogo()
     }
   },
   methods: {
@@ -57,12 +64,25 @@ export default {
       console.log('level : ' + level)
       return level
     },
+    getUsername () {
+      let storage = window.localStorage
+      let currentUserName = ''
+      let nowUser = storage.getItem('nowUser')
+      if (!(nowUser === null)) {
+        currentUserName = JSON.parse(nowUser).username
+      }
+      return currentUserName
+    },
     logout () {
       window.localStorage.clear()
       this.$http.get('http://localhost:8888/user/logout')
           .then((response) => {
           })
       this.$router.push({path: '/'})
+    },
+    getLogo () {
+      console.log(Util.localStorageGet('currentCompanyInfo').logo)
+      return Util.localStorageGet('currentCompanyInfo').logo
     }
   }
 }

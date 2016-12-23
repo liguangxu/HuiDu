@@ -48,15 +48,16 @@ export default new Vue({
         iconAdd: this.getBaseApi() + 'system/iconAdd',
         iconUpdate: this.getBaseApi() + 'system/iconUpdate',
         iconDelete: this.getBaseApi() + 'system/iconDelete',
-        iconUpload: this.getBaseApi() + 'system/uploadIconFile'
+        iconUpload: this.getBaseApi() + 'system/uploadIconFile',
+        companyGetByUrl: this.getBaseApi() + 'system/getCompanyByUrl'
       }
     }
   },
   methods: {
     getBaseApi () {
       // return 'api/'
-      // return 'http://localhost:8888/'
-      return '/'
+      return 'http://localhost:8888/'
+      // return '/'
     },
     showError (title, info) {
       this.$notify.error({

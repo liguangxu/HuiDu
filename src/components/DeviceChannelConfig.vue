@@ -12,7 +12,7 @@
     <el-row>
       <el-col :span="2">&nbsp;</el-col>
       <el-col :span="20">
-      <el-table :data="tableData" stripe border>
+      <el-table v-loading.body="loading" :data="tableData" stripe border>
         <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
         <el-table-column prop="devicetype" label="设备类型" width="100" align="center"></el-table-column>
         <el-table-column prop="deviceid" label="设备编号" width="100" align="center"></el-table-column>
@@ -200,6 +200,7 @@ export default {
       }
     }
     return {
+      loading: false,
       active: 0,
       addChannelFormVisible: false,
       updateChannelFormVisible: false,
@@ -337,6 +338,7 @@ export default {
         })
     },
     getChannelData () {
+      this.loading = true
       let nowUser = Util.localStorageGet('nowUser')
       let userid = nowUser === null ? null : nowUser._id
       this.$set(this, 'channelGetBody', userid)
@@ -347,6 +349,7 @@ export default {
             } else {
               this.$set(this, 'tableData', response.data.data)
               console.log(response.data.data)
+              this.loading = false
             }
           })
           .catch(function (response) {
@@ -443,6 +446,7 @@ export default {
       this.$set(this.updateChannelForm, 'sceneid', row.sceneid)
       this.$set(this.updateChannelForm, 'spotid', row.spotid)
       this.$set(this.updateChannelForm, '_id', row._id)
+      this.$set(this.updateChannelForm, 'datatype', row.datatype)
       // this.$set(this.updateChannelForm, 'old_id', row._id)
       // this.setSceneOptions()
     },

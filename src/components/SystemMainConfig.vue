@@ -65,6 +65,14 @@
             	</el-form-item>
           		</el-col>
         	</el-row>
+          <el-row>
+          <el-col :span="2">&nbsp;</el-col>
+          <el-col :span="20">
+              <el-form-item label="公司网址" prop="homepageurl">
+                <el-input v-model="addCompanyForm.homepageurl"></el-input>
+              </el-form-item>
+          </el-col>
+          </el-row>
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
@@ -149,6 +157,14 @@
             	</el-form-item>
           		</el-col>
         	</el-row>
+          <el-row>
+          <el-col :span="2">&nbsp;</el-col>
+          <el-col :span="20">
+              <el-form-item label="公司网址" prop="homepageurl">
+                <el-input v-model="updateCompanyForm.homepageurl"></el-input>
+              </el-form-item>
+          </el-col>
+          </el-row>
         	<el-row>
         	<el-col :span="2">&nbsp;</el-col>
         	<el-col :span="20">
@@ -241,7 +257,8 @@ export default {
         address: '',
         loginlogo: '',
         backgroundimg: '',
-        logo: ''
+        logo: '',
+        homepageurl: ''
       },
       updateCompanyForm: {
         _id: '',
@@ -255,7 +272,8 @@ export default {
         address: '',
         loginlogo: '',
         backgroundimg: '',
-        logo: ''
+        logo: '',
+        homepageurl: ''
       },
       addCompanyFormVisible: false,
       updateCompanyFormVisible: false,
@@ -286,6 +304,9 @@ export default {
         ],
         address: [
           { required: true, message: '地址不能为空', trigger: 'change' }
+        ],
+        homepageurl: [
+          { required: true, message: '公司网址不能为空', trigger: 'change' }
         ],
         loginlogo: [
           { required: true, message: '登陆页LOGO不能为空', trigger: 'change' }
@@ -321,6 +342,9 @@ export default {
         ],
         address: [
           { required: true, message: '地址不能为空', trigger: 'change' }
+        ],
+        homepageurl: [
+          { required: true, message: '公司网址不能为空', trigger: 'change' }
         ],
         loginlogo: [
           { required: true, message: '登陆页LOGO不能为空', trigger: 'change' }
@@ -401,6 +425,7 @@ export default {
       this.$set(this.updateCompanyForm, 'loginlogo', row.loginlogo)
       this.$set(this.updateCompanyForm, 'backgroundimg', row.backgroundimg)
       this.$set(this.updateCompanyForm, 'logo', row.logo)
+      this.$set(this.updateCompanyForm, 'homepageurl', row.homepageurl)
       let temp = [{ name: '登陆页LOGO', url: row.loginlogo }]
       this.$set(this, 'loginlogoList', temp)
       temp = [{ name: '登陆页背景图', url: row.backgroundimg }]

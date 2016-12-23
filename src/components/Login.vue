@@ -1,11 +1,11 @@
 <template>
 	<div>
 		<div id="background" style="position:absolute; left:0px; top:0px; width:100%; height:100%; position:fixed; z-index:-1;">
-			<img src="../../static/image/index/loginbg.png" height="100%" width="100%">
+			<img :src="backgroundimg" height="100%" width="100%">
 		</div>
 		<div id="login">
 			<el-row>
-				<el-col :span="24"><img src="../../static/image/index/login_logo.png"></el-col>
+				<el-col :span="24"><img :src="loginlogo" width="450" height="65"></el-col>
 			</el-row><br><br>
 			<el-form ref="loginForm" :model="loginForm">
 				<el-row>
@@ -36,6 +36,8 @@
   export default {
     data () {
       return {
+        loginlogo: '../../static/image/index/login_logo.png',
+        backgroundimg: '../../static/image/index/loginbg.png',
         loginForm: {
           username: '',
           password: ''
@@ -85,7 +87,41 @@
               this.$router.push({path: '/main'})
             }
           })
+      },
+      getCompanyByUrl () {
+        let url = window.location.href
+        let arrays = url.split('#')
+        let currentPath = ''
+        if (arrays !== null && arrays.length > 0) {
+          currentPath = arrays[0]
+        }
+        // currentPath = 'http://114.55.92.31/'
+        let body = { homepageurl: currentPath }
+        console.log('url body-------------')
+        console.log(body)
+        this.$http.post(Util.systemApi.companyGetByUrl, body)
+          .then((response) => {
+            if (response.data.code === '0') {
+              Util.showError('获取当前公司信息失败', response.data.data)
+            } else {
+              Util.localStorageSet('currentCompanyInfo', response.data.data)
+              console.log('url back-------------')
+              console.log(response.data.data)
+              if (response.data.data.loginlogo !== null) {
+                this.$set(this, 'loginlogo', response.data.data.loginlogo)
+              }
+              if (response.data.data.backgroundimg !== null) {
+                this.$set(this, 'backgroundimg', response.data.data.backgroundimg)
+              }
+            }
+          })
+          .catch(function (response) {
+            Util.showError('获取当前公司信息失败', '网络错误，请稍后重试')
+          })
       }
+    },
+    mounted: function () {
+      this.getCompanyByUrl()
     }
   }
 </script>
@@ -99,5 +135,9 @@
 	left:50%;
 	top: 50%;
 	transform: translate(-50%,-50%);
+}
+.loginlogImg {
+  width: 450px;
+  height: 65px;
 }
 </style>
