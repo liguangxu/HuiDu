@@ -44,7 +44,8 @@
       <el-col :span="1">&nbsp;</el-col>
       <el-col :span="10">
         <el-form-item label="设备类型" prop="devicetype">
-          <el-input v-model="addChannelForm.devicetype" placeholder="请输入设备类型"></el-input>
+          <el-input v-model="addChannelForm.devicetype" placeholder="请输入设备类型" @blur="getAddAutoDataType">
+          </el-input>
         </el-form-item>
         <el-form-item label="设备编号" prop="deviceid">
           <el-input v-model="addChannelForm.deviceid" placeholder="请输入设备编号"></el-input>
@@ -114,7 +115,8 @@
       <el-col :span="1">&nbsp;</el-col>
       <el-col :span="10">
         <el-form-item label="设备类型" prop="devicetype">
-          <el-input v-model="updateChannelForm.devicetype" placeholder="请输入设备类型"></el-input>
+          <el-input v-model="updateChannelForm.devicetype" placeholder="请输入设备类型" @blur="getUpdateAutoDataType">
+          </el-input>
         </el-form-item>
         <el-form-item label="设备编号" prop="deviceid">
           <el-input v-model="updateChannelForm.deviceid" placeholder="请输入设备编号"></el-input>
@@ -142,7 +144,13 @@
           </el-input>
         </el-form-item>
         <el-form-item label="通道类型">
-          <el-input v-model="updateChannelForm.datatype" placeholder="请输入通道类型" disabled>
+        <el-select v-model="updateChannelForm.datatype">
+            <el-option
+              v-for="item in dataTypeOptions"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
           </el-input>
         </el-form-item>
         <el-form-item label="用户定义最大值" prop="usermaxdata">
@@ -319,6 +327,50 @@ export default {
     }
   },
   methods: {
+    getUpdateAutoDataType () {
+      let dType = this.updateChannelForm.devicetype
+      this.$http.post(Util.deviceApi.dataTypeGet, dType)
+        .then((response) => {
+          if (response.data.code === '0') {
+            Util.showError('获取通道类型数据失败', '请稍后重试')
+          } else {
+            let options = []
+            for (let i = 0; i < response.data.data.length; i++) {
+              let tempValue = response.data.data[i].datatype
+              let item = { label: tempValue, value: tempValue }
+              options.push(item)
+            }
+            this.$set(this, 'dataTypeOptions', options)
+            console.log('-----------get datatype here')
+            console.log(options)
+          }
+        })
+        .catch(function (response) {
+          Util.showError('获取通道类型数据失败', '网络错误，请稍后重试')
+        })
+    },
+    getAddAutoDataType () {
+      let dType = this.addChannelForm.devicetype
+      this.$http.post(Util.deviceApi.dataTypeGet, dType)
+        .then((response) => {
+          if (response.data.code === '0') {
+            Util.showError('获取通道类型数据失败', '请稍后重试')
+          } else {
+            let options = []
+            for (let i = 0; i < response.data.data.length; i++) {
+              let tempValue = response.data.data[i].datatype
+              let item = { label: tempValue, value: tempValue }
+              options.push(item)
+            }
+            this.$set(this, 'dataTypeOptions', options)
+            console.log('-----------get datatype here')
+            console.log(options)
+          }
+        })
+        .catch(function (response) {
+          Util.showError('获取通道类型数据失败', '网络错误，请稍后重试')
+        })
+    },
     refreshUserInfo () {
       let nowUser = Util.localStorageGet('nowUser')
       let userid = nowUser === null ? null : nowUser._id
@@ -446,6 +498,7 @@ export default {
       this.$set(this.updateChannelForm, 'sceneid', row.sceneid)
       this.$set(this.updateChannelForm, 'spotid', row.spotid)
       this.$set(this.updateChannelForm, '_id', row._id)
+      this.getUpdateAutoDataType()
       this.$set(this.updateChannelForm, 'datatype', row.datatype)
       // this.$set(this.updateChannelForm, 'old_id', row._id)
       // this.setSceneOptions()

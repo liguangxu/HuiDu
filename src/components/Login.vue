@@ -95,7 +95,7 @@
         if (arrays !== null && arrays.length > 0) {
           currentPath = arrays[0]
         }
-        // currentPath = 'http://114.55.92.31/'
+        currentPath = 'http://114.55.92.31/'
         let body = { homepageurl: currentPath }
         console.log('url body-------------')
         console.log(body)

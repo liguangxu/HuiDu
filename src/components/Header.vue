@@ -2,7 +2,7 @@
 	<div>
 		<div class="navbar">
 			<el-menu theme="dark" class="header" v-bind:default-active="path" mode="horizontal" router>
-					<el-menu-item index="0" class="navbar-logo navbar-font"><img :src="logoImg" width="300" height="30">
+					<el-menu-item index="0" class="navbar-logo navbar-brand"><img :src="logoImg" width="300" height="40">
           </el-menu-item>
 				<div class="navbar-item">
           <el-menu-item index="0" class="navbar-logo navbar-font"><i class="fa fa-user-o" aria-hidden="true"></i>
@@ -110,5 +110,8 @@ export default {
 .navbar-item {
   float: right;
   /*min-width: 1024px;*/
+}
+.navbar-brand {
+  top: 10px;
 }
 </style>

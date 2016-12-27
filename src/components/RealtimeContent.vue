@@ -28,7 +28,9 @@
 					<el-tab-pane label="图标">
             <my-realtimeicon :iconData="iconData"></my-realtimeicon>
           </el-tab-pane>
-					<el-tab-pane label="场景">场景</el-tab-pane>
+					<el-tab-pane label="场景">
+            <my-realtimescene :sceneData="sceneData"></my-realtimescene>     
+          </el-tab-pane>
 				</el-tabs>
 			</el-col>
 			<el-col :span="2"></el-col>
@@ -44,6 +46,7 @@
 <script>
 import MyRealtimeTable from './RealtimeTable.vue'
 import MyRealtimeIcon from './RealtimeIcon.vue'
+import MyRealtimeScene from './RealtimeScene.vue'
 import MyFactor from './Factor.vue'
 import Util from '../utils/util.js'
 import { bus } from '../utils/bus.js'
@@ -56,6 +59,7 @@ export default {
       list: [{}],
       tableData: [],
       iconData: [],
+      sceneData: '',
       factors: [],
       nowFactor: '',
       hasSendFactors: false,
@@ -71,7 +75,8 @@ export default {
   components: {
     'my-realtimetable': MyRealtimeTable,
     'my-factor': MyFactor,
-    'my-realtimeicon': MyRealtimeIcon
+    'my-realtimeicon': MyRealtimeIcon,
+    'my-realtimescene': MyRealtimeScene
   },
   methods: {
     formatTime () {
@@ -96,6 +101,10 @@ export default {
       this.$set(this.realtimeGetBody, 'userid', userid)
       this.$set(this.realtimeGetBody, 'sceneid', sceneid)
       this.$set(this.realtimeGetBody, 'factor', this.nowFactor)
+      let sceneImg = Util.getRealtimeSceneImg(sceneid)
+      this.$set(this, 'sceneData', sceneImg)
+      console.log('sceneData----------------')
+      console.log(this.sceneData)
     },
     getData () {
       this.setRealtimeGetBody()

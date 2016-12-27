@@ -37,7 +37,8 @@ export default new Vue({
         spotDelete: this.getBaseApi() + 'device/spot/delete',
         channelGet: this.getBaseApi() + 'device/channel/get',
         channelSpotGet: this.getBaseApi() + 'device/channel/getSpot',
-        channelAdd: this.getBaseApi() + 'device/channel/add'
+        channelAdd: this.getBaseApi() + 'device/channel/add',
+        dataTypeGet: this.getBaseApi() + 'system/getDataType'
       },
       systemApi: {
         companyGet: this.getBaseApi() + 'system/getCompany',
@@ -56,8 +57,8 @@ export default new Vue({
   methods: {
     getBaseApi () {
       // return 'api/'
-      return 'http://localhost:8888/'
-      // return '/'
+      // return 'http://localhost:8888/'
+      return '/'
     },
     showError (title, info) {
       this.$notify.error({
@@ -113,6 +114,15 @@ export default new Vue({
         }
       }
       return false
+    },
+    getRealtimeSceneImg (sceneid) {
+      let list = this.localStorageGet('nowUser').sceneList
+      for (let i = 0; i < list.length; i++) {
+        if (list[i]._id === sceneid) {
+          return list[i].image
+        }
+      }
+      return ''
     },
     getNowLevel () {
       return this.localStorageGet('nowUser').level
