@@ -11,8 +11,12 @@
 			<div class="factor-wrap" id="imgs">
         <div v-for="item in factors">
           <div class="factor">
-          <img src="../../static/image/info/02.png" @click="getDataByFactor(item)">
-          <span class="factor-desc">{{ item }}</span>
+          <img :src="item.bigiconurl === '' ? getDefaultFactorImg(item.userdesc) : item.bigiconurl"
+          onerror="javascript:this.src='../../static/image/info/default.png';"
+          @click="getDataByFactor(item.userdesc)">
+          <!-- <img src="../../static/image/info/温度.png"
+          @click="getDataByFactor(item.userdesc)"> -->
+          <span class="factor-desc">{{ item.userdesc }}</span>
           </div>
         </div>
 				</div>
@@ -38,6 +42,35 @@
     },
     props: ['factors'],
     methods: {
+      getDefaultFactorImg (userdesc) {
+        let desc = 'default'
+        if (userdesc === '温度') {
+          desc = 'wendu'
+        }
+        if (userdesc === '湿度') {
+          desc = 'shidu'
+        }
+        if (userdesc === '电流') {
+          desc = 'dianliu'
+        }
+        if (userdesc === '电压') {
+          desc = 'dianya'
+        }
+        if (userdesc === '风向') {
+          desc = 'fengxiang'
+        }
+        if (userdesc === '风速') {
+          desc = 'fengsu'
+        }
+        if (userdesc === '浓度') {
+          desc = 'nongdu'
+        }
+        if (userdesc === '大气压') {
+          desc = 'daqiya'
+        }
+        let result = '../../static/image/info/' + desc + '.png'
+        return result
+      },
       ctrlleft: function () {
         if (this.the_index === 0) {
           return
